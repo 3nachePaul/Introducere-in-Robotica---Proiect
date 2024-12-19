@@ -54,11 +54,13 @@ All components interact through the microcontroller, which handles the applicati
 - Breadboard or PCB for circuit assembly  
 - Power supply (e.g., battery or USB)  
 - Switch (for turning the safe on and off)
-- 
+ 
 **Block Diagram**
-![Tinkercad Circuit](Images/Schema_bloc.png)
+  
+  ![Tinkercad Circuit](Images/Schema_bloc.png)
 
 **Circuit Diagram:**  
+
   ![Tinkercad Circuit](Images/Schema_electrica.jpg)
 
 **Physical Circuit (without box)**
