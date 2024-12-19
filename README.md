@@ -56,7 +56,7 @@ All components interact through the microcontroller, which handles the applicati
 - Switch (for turning the safe on and off)
 - 
 **Block Diagram**
-![Tinkercad Circuit](Images/Schema_bloc.jpg)
+![Tinkercad Circuit](Images/Schema_bloc.png)
 
 **Circuit Diagram:**  
   ![Tinkercad Circuit](Images/Schema_electrica.jpg)
