@@ -56,7 +56,8 @@ All components interact through the microcontroller, which handles the applicati
 - Switch (for turning the safe on and off)  
 
 **Circuit Diagram:**  
-(To be designed using Fritzing or Tinkercad, showing all hardware connections.)  
+  ![Tinkercad Circuit](Image/schema_electrica/nume_imagine.png)
+
 
 **Signal Diagrams:**  
 - PWM signal for servo motor control.  
