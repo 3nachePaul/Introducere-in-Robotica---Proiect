@@ -1,7 +1,9 @@
 # DIY Safe Box  
 
 ---
-
+<details>
+   <summary>Introduction</summary>
+   
 # Introduction  
 
 **Project Name:** DIY Safe Box 
@@ -29,10 +31,14 @@ I wanted to make a safe and then I found a game made by someone and I wanted to 
 
 All components interact through the master microcontroller, which handles the application logic and communication with the slave microcontroller for RFID access validation.
 
+</details>
 ---
 
 # Hardware Design  
 
+<details>
+   <summary>Bill of Materials</summary>
+   
 ## Bill of Materials: 
 | **Components**| **Quantity** | **Description** | **Datasheet** | **Source/Link** |
 |---------------|--------------|-----------------|---------------|-----------------|
@@ -47,7 +53,7 @@ All components interact through the master microcontroller, which handles the ap
 | Breadboard | 2 | Used to connect components to a power source and ground. | | Faculty kit.|  
 | Power supply 4xAA Battery Support | 1 | Powers source for the components. | | [Battery Support](https://www.optimusdigital.ro/ro/suporturi-de-baterii/12375-suport-baterii-4-x-aa.html?srsltid=AfmBOoofXrcJw2xVfQ2PUKit96xbxR78K6Rq58X9t2aqwo0t1SOdFPyv) 
 | Switch | 1 | Turns the device on and off. | | Personal item. |
-
+</details>
 ## Circuit Diagram:  
 
 (To be added later to visually represent the connections between components.)  
@@ -65,7 +71,8 @@ All components interact through the master microcontroller, which handles the ap
 - **Development Environment:** Arduino IDE.
 
 ## Master Arduino:
-   
+ <details> 
+
 ## Libraries Used
 
 ```
@@ -90,7 +97,9 @@ All components interact through the master microcontroller, which handles the ap
 
 ### Servo.h
 - The `Servo` library is used to control servo motors. It provides functions to attach a servo motor to a specific pin, set the angle of the servo, and control its movement. In this project, the library is used to control the servo motor that locks and unlocks the safe. 
+ <details></details>   
 
+<details>
 ## Constants
 
 ```
@@ -145,7 +154,9 @@ const int CORRECT_PLACE_LEDS[] = {12, 10, 8, 6};
 
 ### CORRECT_PLACE_LEDS
 - Defines an array of pin numbers for the LEDs that indicate the correct placement of digits in the code. The LEDs are connected to pins 12, 10, 8, and 6.
+</details>
 
+<details>
 ## Globals
 
 ```
@@ -279,7 +290,7 @@ const byte PROGMEM frames[][128] = {
 
 ### frames
 - A constant array of bytes stored in program memory (PROGMEM) that contains the frames of the animation.
-
+</details>
 # setup Function
 
 ```
@@ -1369,6 +1380,7 @@ The `animateLEDs` function performs an LED animation sequence using non-blocking
 ### digitalWrite(CORRECT_PLACE_LEDS[i], LOW);
 - Turns off the LED in `CORRECT_PLACE_LEDS` at index `i`.
 
+</details> 
 # Slave Arduino:
 
 # RFID Reader and I2C Communication
