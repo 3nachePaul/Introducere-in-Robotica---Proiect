@@ -68,6 +68,14 @@ All components interact through the master microcontroller, which handles the ap
    
 ## Libraries Used
 
+```
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <Servo.h>
+```
+
 ### SPI.h
 - The `SPI` library is used for communication with devices that use the Serial Peripheral Interface (SPI) protocol. This protocol is commonly used for communication with sensors, SD cards, and other peripherals that require high-speed data transfer.
 
@@ -84,6 +92,23 @@ All components interact through the master microcontroller, which handles the ap
 - The `Servo` library is used to control servo motors. It provides functions to attach a servo motor to a specific pin, set the angle of the servo, and control its movement. In this project, the library is used to control the servo motor that locks and unlocks the safe. 
 
 ## Constants
+
+```
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 32
+#define OLED_RESET -1
+#define SLAVE_ADDRESS 0x08
+
+const int PIN_A = 3;
+const int PIN_B = 4;
+const int BUTTON_PIN = 5;
+const int SERVO_UNLOCK_ANGLE =  map(50, -60, 60, 0, 180);;
+const int SERVO_LOCK_ANGLE =  map(-50, -60, 60, 0, 180);
+const unsigned long DEBOUNCE_TIME = 50; // Debounce time in milliseconds
+
+const int CORRECT_NUM_LEDS[] = {13, 11, 9, 7};
+const int CORRECT_PLACE_LEDS[] = {12, 10, 8, 6};
+```
 
 ### SCREEN_WIDTH
 - Defines the width of the OLED display in pixels. In this case, it is set to 128 pixels.
@@ -122,6 +147,66 @@ All components interact through the master microcontroller, which handles the ap
 - Defines an array of pin numbers for the LEDs that indicate the correct placement of digits in the code. The LEDs are connected to pins 12, 10, 8, and 6.
 
 ## Globals
+
+```
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Servo lockServo;
+
+byte code[4] = {0};
+byte codeGuess[4] = {0};
+byte guessingDigit = 0;
+byte numGuesses = 0;
+volatile int encoderValue = 0;
+volatile int lastAState;
+
+
+bool isUnlocking = false;
+bool isLocking = false;
+bool isDisplayingMessage = false;
+bool correctGuess = false;
+bool oldButtonState = HIGH;
+bool isDisplayingCrackedMessage = false;
+bool isStartupAnimation = false;
+int startupAnimationStep = 0;
+unsigned long buttonPressTime = 0;
+unsigned long lastActionTime = 0;
+unsigned long crackedMessageStartTime = 0;
+
+#define FRAME_DELAY (42)
+#define FRAME_WIDTH (32)
+#define FRAME_HEIGHT (32)
+#define FRAME_COUNT (sizeof(frames) / sizeof(frames[0]))
+const byte PROGMEM frames[][128] = {
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,32,25,144,0,32,24,208,0,32,8,112,0,32,12,48,0,32,6,16,0,32,3,0,0,32,1,128,0,32,0,192,0,32,0,96,0,32,0,56,0,96,0,12,0,192,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,31,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,32,9,144,0,32,24,208,0,32,8,112,0,32,4,48,0,32,2,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,7,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,27,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,25,144,0,32,24,208,0,32,8,112,0,32,4,48,0,32,2,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,7,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,27,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,9,144,0,32,24,208,0,32,12,112,0,32,6,48,0,32,2,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,3,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,31,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,9,144,0,32,8,208,0,32,12,112,0,32,6,48,0,32,3,16,0,32,1,128,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,3,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,30,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,9,144,0,32,8,208,0,32,12,112,0,32,6,48,0,32,3,16,0,32,1,128,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,64,0,12,0,192,0,3,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,0,0,0,31,0,0,0,31,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,9,144,0,32,8,208,0,32,12,112,0,32,6,48,0,32,3,16,0,32,1,128,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,3,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,0,0,0,27,0,0,0,53,128,0,0,63,128,0,0,49,128,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,9,144,0,32,8,208,0,32,12,112,0,32,6,48,0,32,3,16,0,32,1,128,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,3,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,63,0,0,0,32,128,0,0,46,128,0,0,59,128,0,0,49,128,0,0,49,128,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,9,144,0,32,24,208,0,32,12,112,0,32,6,48,0,32,3,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,3,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,31,0,0,0,33,128,0,0,96,192,0,0,78,64,0,0,91,64,0,0,81,64,0,0,49,128,0,0,49,128,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,25,144,0,32,24,208,0,32,12,112,0,32,6,48,0,32,2,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,3,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,31,0,0,0,63,128,0,0,96,192,0,0,64,64,0,0,222,64,0,0,211,64,0,0,81,64,0,0,81,64,0,0,49,128,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,96,0,17,19,32,15,16,2,32,25,144,0,32,24,208,0,32,8,112,0,32,4,48,0,32,2,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,3,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,31,0,0,0,97,192,0,0,64,64,0,0,204,96,0,0,159,32,0,0,145,32,0,0,145,96,0,0,209,64,0,0,113,192,0,0,49,128,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,32,25,144,0,32,24,208,0,32,8,112,0,32,4,48,0,32,2,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,7,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,14,0,0,0,63,128,0,0,96,192,0,0,192,96,0,0,142,32,0,0,155,32,0,0,145,32,0,0,145,32,0,0,145,96,0,0,209,64,0,0,113,192,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,32,9,144,0,32,24,208,0,32,8,112,0,32,4,48,0,32,2,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,7,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,31,0,0,0,113,128,0,0,192,64,0,0,128,96,0,1,142,32,0,1,147,48,0,1,17,48,0,1,145,48,0,0,145,32,0,0,209,96,0,0,113,192,0,0,49,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,32,9,144,0,32,24,208,0,32,8,112,0,32,4,48,0,32,2,16,0,32,1,0,0,32,0,128,0,32,0,64,0,32,0,32,0,32,0,24,0,96,0,12,0,192,0,7,255,128,0,0,120,0,0,0,0,0},
+  {0,0,0,0,0,63,128,0,0,97,192,0,0,192,96,0,1,128,32,0,1,30,48,0,1,17,16,0,1,17,16,0,1,17,16,0,1,145,48,0,0,145,32,0,0,81,64,0,0,49,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,32,25,144,0,32,24,208,0,32,8,112,0,32,4,48,0,32,2,16,0,32,3,0,0,32,1,128,0,32,0,192,0,32,0,96,0,32,0,56,0,96,0,12,0,192,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,63,128,0,0,96,192,0,0,128,32,0,1,140,48,0,1,31,16,0,1,17,16,0,1,17,16,0,1,17,16,0,1,17,48,0,0,145,32,0,0,209,96,0,0,113,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,32,25,144,0,32,24,208,0,32,8,112,0,32,12,48,0,32,6,16,0,32,3,0,0,32,1,128,0,32,0,192,0,32,0,96,0,32,0,56,0,96,0,12,0,192,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,4,0,0,0,59,128,0,0,64,64,0,0,128,32,0,1,14,16,0,1,27,16,0,1,17,16,0,1,17,16,0,1,17,16,0,1,17,16,0,0,145,32,0,0,209,96,0,0,49,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,56,0,96,0,12,0,192,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,49,128,0,0,64,64,0,0,128,32,0,1,14,16,0,1,27,16,0,1,17,16,0,0,17,16,0,1,17,16,0,1,17,16,0,0,145,32,0,0,145,32,0,0,113,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,56,0,96,0,12,0,192,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,4,0,0,0,49,128,0,0,64,64,0,0,128,32,0,1,14,16,0,1,19,16,0,0,17,16,0,0,17,0,0,1,17,16,0,1,17,16,0,0,145,32,0,0,145,32,0,0,113,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0}
+};
+```
 
 ### display
 - An instance of the `Adafruit_SSD1306` class, used to control the OLED display.
@@ -197,6 +282,46 @@ All components interact through the master microcontroller, which handles the ap
 
 # setup Function
 
+```
+void setup() {
+    Serial.begin(9600);
+
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        Serial.println(F("SSD1306 allocation failed"));
+        while (true);
+    }
+
+    display.clearDisplay();
+    lockServo.attach(2);
+    Wire.begin();
+
+    // Initialize LEDs
+    for (int i = 0; i < 4; i++) {
+        pinMode(CORRECT_NUM_LEDS[i], OUTPUT);
+        pinMode(CORRECT_PLACE_LEDS[i], OUTPUT);
+        digitalWrite(CORRECT_NUM_LEDS[i], LOW);
+        digitalWrite(CORRECT_PLACE_LEDS[i], LOW);
+    }
+
+    // Initialize encoder
+    pinMode(PIN_A, INPUT_PULLUP);
+    pinMode(PIN_B, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(PIN_A), updateEncoder, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(PIN_B), updateEncoder, CHANGE);
+
+    // Initialize button
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+    randomSeed(analogRead(0));
+    display.setTextColor(SSD1306_WHITE);
+
+    lockSafe();
+    startupAnimation();
+    animateLEDs();
+    generateNewCode();
+}
+```
+
 The `setup` function is called once when the microcontroller starts. It initializes various components and sets up the initial state of the system.
 
 ### Serial.begin(9600);
@@ -261,6 +386,41 @@ The `setup` function is called once when the microcontroller starts. It initiali
 
 # loop Function
 
+```
+void loop() {
+    if (correctGuess) {
+        unlockSafe();
+        return;
+    }
+
+    if (checkStopSignal()) {
+        displayAccessGrantedMessage();
+        unlockSafe();
+        return;
+    }
+
+    handleCodeInput();
+    numGuesses++;
+    evaluateGuess();
+
+    resetGuess();
+    updateDisplayCode();
+
+    // Handle non-blocking delays
+    if (isUnlocking && millis() - lastActionTime >= 500) {
+        lockServo.write(SERVO_UNLOCK_ANGLE);
+        isUnlocking = false;
+        lastActionTime = millis();
+    }
+
+    if (isLocking && millis() - lastActionTime >= 500) {
+        lockServo.write(SERVO_LOCK_ANGLE);
+        isLocking = false;
+        lastActionTime = millis();
+    }
+}
+```
+
 The `loop` function runs continuously after the `setup` function has completed. It handles the main logic of the program, including checking for correct guesses, handling code input, and controlling the servo motor.
 
 ### if (correctGuess) { ... }
@@ -295,6 +455,26 @@ The `loop` function runs continuously after the `setup` function has completed. 
 
 
 # updateDisplayCode Function
+
+```
+void updateDisplayCode() {
+    display.clearDisplay();
+    String temp;
+    for (int i = 0; i < 4; i++) {
+        if (i < guessingDigit) {
+            temp += String(codeGuess[i]);
+        } else if (i == guessingDigit) {
+            temp += String(abs(encoderValue) % 10);
+        } else {
+            temp += "0";
+        }
+    }
+    display.setTextSize(2);
+    display.setCursor(20, 10);
+    display.println(temp);
+    display.display();
+}
+```
 
 The `updateDisplayCode` function updates the code displayed on the OLED screen based on the user's input and the current state of the encoder.
 
@@ -331,6 +511,17 @@ The `updateDisplayCode` function updates the code displayed on the OLED screen b
 
 # generateNewCode Function
 
+```
+void generateNewCode() {
+    Serial.print("Code: ");
+    for (int i = 0; i < 4; i++) {
+        code[i] = random(0, 10);
+        Serial.print(code[i]);
+    }
+    Serial.println();
+}
+```
+
 The `generateNewCode` function generates a new random 4-digit code and prints it to the serial monitor.
 
 ### Serial.print("Code: ");
@@ -349,6 +540,30 @@ The `generateNewCode` function generates a new random 4-digit code and prints it
 - Prints a newline character to the serial monitor to end the line after printing the full code.
 
 # handleCodeInput Function
+
+```
+void handleCodeInput() {
+    for (int i = 0; i < 4; i++) {
+        guessingDigit = i;
+        bool confirmed = false;
+
+        while (!confirmed) {
+            bool buttonState = digitalRead(BUTTON_PIN);
+            if (buttonState != oldButtonState && millis() - buttonPressTime >= DEBOUNCE_TIME) {
+                buttonPressTime = millis();
+                oldButtonState = buttonState;
+
+                if (buttonState == LOW) {
+                    codeGuess[i] = abs(encoderValue) % 10;
+                    confirmed = true;
+                }
+            }
+            updateDisplayCode();
+        }
+    }
+}
+```
+
 
 The `handleCodeInput` function handles the user's input for guessing the code. It allows the user to set each digit of the code using a rotary encoder and a button.
 
@@ -391,6 +606,23 @@ The `handleCodeInput` function handles the user's input for guessing the code. I
 
 # displayAccessGrantedMessage Function
 
+```
+void displayAccessGrantedMessage() {
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(10, 10);
+    display.println(F("Access Granted!"));
+    display.display();
+    unsigned long startMillis = millis();
+    while (millis() - startMillis < 5000) {
+        // Wait for 5000 milliseconds (5 seconds)
+    }
+    display.clearDisplay();
+    display.display();
+}
+```
+
+
 The `displayAccessGrantedMessage` function displays an "Access Granted!" message on the OLED screen for 5 seconds.
 
 ### display.clearDisplay();
@@ -421,6 +653,39 @@ The `displayAccessGrantedMessage` function displays an "Access Granted!" message
 - Updates the OLED display to show the cleared screen.
 
 # evaluateGuess Function
+
+```
+void evaluateGuess() {
+    int correctNum = 0;
+    int correctPlace = 0;
+    bool usedDigits[4] = {false};
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (codeGuess[i] == code[j] && !usedDigits[j]) {
+                correctNum++;
+                usedDigits[j] = true;
+                break;
+            }
+        }
+        if (codeGuess[i] == code[i]) {
+            correctPlace++;
+        }
+    }
+
+    updateLEDs(correctNum, correctPlace);
+    if (correctPlace == 4) {
+        correctGuess = true;
+        display.clearDisplay();
+        display.setCursor(20, 10);
+        display.println(F("Cracked!"));
+        display.display();
+        isDisplayingCrackedMessage = true;
+        crackedMessageStartTime = millis();
+    }
+}
+```
+
 
 The `evaluateGuess` function evaluates the user's guess against the correct code and updates the LEDs and display accordingly.
 
@@ -474,6 +739,16 @@ The `evaluateGuess` function evaluates the user's guess against the correct code
 
 # updateLEDs Function
 
+```
+void updateLEDs(int correctNum, int correctPlace) {
+    for (int i = 0; i < 4; i++) {
+        digitalWrite(CORRECT_NUM_LEDS[i], i < correctNum ? HIGH : LOW);
+        digitalWrite(CORRECT_PLACE_LEDS[i], i < correctPlace ? HIGH : LOW);
+    }
+}
+```
+
+
 The `updateLEDs` function updates the state of the LEDs based on the number of correct digits and correct placements in the user's guess.
 
 ### void updateLEDs(int correctNum, int correctPlace) { ... }
@@ -489,6 +764,32 @@ The `updateLEDs` function updates the state of the LEDs based on the number of c
 - Sets the state of the LEDs indicating the correct placement of digits. If `i` is less than `correctPlace`, the LED is turned on (HIGH); otherwise, it is turned off (LOW).
 
 # unlockSafe Function
+
+```
+void unlockSafe() {
+    lockServo.write(SERVO_UNLOCK_ANGLE);
+    isUnlocking = true;
+    lastActionTime = millis();
+
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(35, 10);
+    display.println(F("Unlocked!"));
+    display.display();
+
+    unsigned long startMillis = millis();
+    while (millis() - startMillis < 3000) {
+        // Wait for 3000 milliseconds (3 seconds)
+    }
+
+    display.clearDisplay();
+    display.display();
+    isDisplayingMessage = false;
+    animateLEDs();
+    displayButtonPressAnimation();
+}
+```
+
 
 The `unlockSafe` function unlocks the safe, displays an "Unlocked!" message, and performs LED animations.
 
@@ -541,6 +842,49 @@ The `unlockSafe` function unlocks the safe, displays an "Unlocked!" message, and
 - Calls the `displayButtonPressAnimation` function to display the button press animation.
 
 # displayButtonPressAnimation Function
+
+```
+void displayButtonPressAnimation() {
+    const char* staticText = "Press the button";
+    int16_t textX = (SCREEN_WIDTH - strlen(staticText) * 6) / 2; // Center the text horizontally
+    int16_t textY = 0;  // Fixed vertical position for static text
+
+    int frame = 0;
+    unsigned long lastFrameTime = millis();
+    unsigned long lastScrollTime = millis();
+
+    while (true) {
+        unsigned long currentMillis = millis();
+
+        if (currentMillis - lastFrameTime >= 42) { // Adjust the speed of the frame animation
+            lastFrameTime = currentMillis;
+
+            display.clearDisplay();
+            display.setTextSize(1);
+            display.setCursor(textX, textY);
+            display.println(staticText);
+
+            display.drawBitmap(32, (SCREEN_HEIGHT - FRAME_HEIGHT) / 2, frames[frame], FRAME_WIDTH, FRAME_HEIGHT, 1);
+            display.display();
+
+            frame = (frame + 1) % FRAME_COUNT;
+        }
+
+        // Check for button press to start a new round
+        bool buttonState = digitalRead(BUTTON_PIN);
+        if (buttonState != oldButtonState && millis() - lastActionTime >= DEBOUNCE_TIME) {
+            buttonPressTime = millis();
+            oldButtonState = buttonState;
+
+            if (buttonState == LOW) {
+                lockSafe();
+                break;
+            }
+        }
+    }
+}
+```
+
 
 The `displayButtonPressAnimation` function displays an animation on the OLED screen and waits for the user to press a button to start a new round.
 
@@ -621,6 +965,25 @@ The `displayButtonPressAnimation` function displays an animation on the OLED scr
 
 # waitForLock Function
 
+```
+void waitForLock() {
+    bool locked = false;
+    while (!locked) {
+        bool buttonState = digitalRead(BUTTON_PIN);
+        if (buttonState != oldButtonState && millis() - buttonPressTime >= DEBOUNCE_TIME) {
+            buttonPressTime = millis();
+            oldButtonState = buttonState;
+
+            if (buttonState == LOW) {
+                lockSafe();
+                locked = true;
+            }
+        }
+    }
+}
+```
+
+
 The `waitForLock` function waits for the user to press a button to lock the safe.
 
 ### void waitForLock() { ... }
@@ -654,6 +1017,24 @@ The `waitForLock` function waits for the user to press a button to lock the safe
 - Sets the `locked` variable to `true` to exit the loop.
 
 # startupAnimation Function
+
+```
+void startupAnimation() {
+    const char* messages[] = {"Crack", "The", "Code"};
+    for (int i = 0; i < 3; i++) {
+        display.clearDisplay();
+        display.setTextSize(2);
+        display.setCursor(40, 10);
+        display.println(messages[i]);
+        display.display();
+
+        unsigned long startMillis = millis();
+        while (millis() - startMillis < 500) {
+        }
+    }
+}
+```
+
 
 The `startupAnimation` function displays a startup animation with the messages "Crack", "The", and "Code" on the OLED screen.
 
@@ -689,6 +1070,17 @@ The `startupAnimation` function displays a startup animation with the messages "
 
 # updateEncoder Function
 
+```
+void updateEncoder() {
+    int currentAState = digitalRead(PIN_A);
+    if (currentAState != lastAState) {
+        encoderValue += (digitalRead(PIN_B) != currentAState) ? 1 : -1;
+        lastAState = currentAState;
+    }
+}
+```
+
+
 The `updateEncoder` function updates the encoder value based on the state of the encoder pins.
 
 ### void updateEncoder() { ... }
@@ -708,6 +1100,17 @@ The `updateEncoder` function updates the encoder value based on the state of the
 
 # checkStopSignal Function
 
+```
+bool checkStopSignal() {
+    Wire.requestFrom(SLAVE_ADDRESS, 1);
+    while (Wire.available()) {
+        return Wire.read() == 1;
+    }
+    return false;
+}
+```
+
+
 The `checkStopSignal` function checks for a stop signal from a slave device over I2C communication.
 
 ### bool checkStopSignal() { ... }
@@ -726,6 +1129,23 @@ The `checkStopSignal` function checks for a stop signal from a slave device over
 - Returns `false` if no data is available or the data is not equal to 1.
 
 # lockSafe Function
+
+```
+void lockSafe() {
+    lockServo.write(SERVO_LOCK_ANGLE);
+    isLocking = true;
+    lastActionTime = millis();
+
+    display.clearDisplay();
+    display.setCursor(30, 10);
+    display.println(F("Locked"));
+    display.display();
+    isDisplayingMessage = true;
+    lastActionTime = millis();
+    resetGame();
+}
+```
+
 
 The `lockSafe` function locks the safe, displays a "Locked" message, and resets the game.
 
@@ -764,6 +1184,15 @@ The `lockSafe` function locks the safe, displays a "Locked" message, and resets 
 
 # resetGame Function
 
+```
+void resetGame() {
+    correctGuess = false;
+    resetGuess();
+    generateNewCode();
+    updateLEDs(0, 0);
+}
+```
+
 The `resetGame` function resets the game state, generates a new code, and updates the LEDs.
 
 ### void resetGame() { ... }
@@ -783,6 +1212,17 @@ The `resetGame` function resets the game state, generates a new code, and update
 
 # resetGuess Function
 
+```
+void resetGuess() {
+    encoderValue = 0;
+    guessingDigit = 0;
+    for (int i = 0; i < 4; i++) {
+        codeGuess[i] = 0;
+    }
+}
+```
+
+
 The `resetGuess` function resets the user's guess and the encoder value.
 
 ### void resetGuess() { ... }
@@ -801,6 +1241,59 @@ The `resetGuess` function resets the user's guess and the encoder value.
 - Resets each digit of the `codeGuess` array to 0.
 
 # animateLEDs Function
+
+```
+void animateLEDs() {
+  unsigned long startTime = millis();
+  unsigned long elapsedTime = 0;
+
+  unsigned long animationDuration = 2000;
+  unsigned long interval = 200;)
+
+  int numLeds = 4;
+
+  while (elapsedTime < animationDuration) {
+    elapsedTime = millis() - startTime;
+
+    // Step 1: Light up CORRECT_NUM_LEDS[] one by one
+    if (elapsedTime < (interval * numLeds)) {
+      int ledIndex = elapsedTime / interval;  // Determine which LED to turn on
+      if (ledIndex < numLeds) {
+        digitalWrite(CORRECT_NUM_LEDS[ledIndex], HIGH);  // Turn on LED in CORRECT_NUM_LEDS[]
+      }
+    }
+
+    // Step 2: Light up CORRECT_PLACE_LEDS[] after all CORRECT_NUM_LEDS[] are lit
+    else if (elapsedTime < (interval * (numLeds + numLeds))) {
+      int ledIndex = (elapsedTime - (interval * numLeds)) / interval;  // Determine which LED to turn on from CORRECT_PLACE_LEDS
+      if (ledIndex < numLeds) {
+        digitalWrite(CORRECT_PLACE_LEDS[ledIndex], HIGH);  // Turn on LED in CORRECT_PLACE_LEDS[]
+      }
+    }
+
+    // Step 3: Turn off LEDs in reverse order after the animation duration
+    else if (elapsedTime < animationDuration + (interval * numLeds)) {
+      int ledIndex = (elapsedTime - animationDuration) / interval;  // Reverse turn-off
+      if (ledIndex < numLeds) {
+        digitalWrite(CORRECT_PLACE_LEDS[numLeds - 1 - ledIndex], LOW);  // Turn off LED in reverse order from CORRECT_PLACE_LEDS[]
+      }
+    } else {
+      int ledIndex = (elapsedTime - animationDuration - (interval * numLeds)) / interval;  // Reverse turn-off
+      if (ledIndex < numLeds) {
+        digitalWrite(CORRECT_NUM_LEDS[numLeds - 1 - ledIndex], LOW);  // Turn off LED in reverse order from CORRECT_NUM_LEDS[]
+      }
+    }
+
+  }
+
+  // After the full 2 seconds, make sure all LEDs are off
+  for (int i = 0; i < numLeds; i++) {
+    digitalWrite(CORRECT_NUM_LEDS[i], LOW);
+    digitalWrite(CORRECT_PLACE_LEDS[i], LOW);
+  }
+}
+```
+
 
 The `animateLEDs` function performs an LED animation sequence using non-blocking delays.
 
@@ -884,6 +1377,22 @@ This code sets up an RFID reader using the MFRC522 library and communicates with
 
 ## Libraries and Definitions
 
+```
+#include <Wire.h>
+#include <SPI.h>
+#include <MFRC522.h>
+
+#define SLAVE_ADDRESS 0x08
+
+// RFID Setup
+#define RST_PIN 9      // Reset pin for MFRC522
+#define SS_PIN 10      // Slave select pin for MFRC522
+MFRC522 rfid(SS_PIN, RST_PIN);
+
+volatile bool stopSignal = false;
+```
+
+
 ### #include <Wire.h>
 - Includes the Wire library for I2C communication.
 
@@ -910,6 +1419,21 @@ This code sets up an RFID reader using the MFRC522 library and communicates with
 
 ## setup Function
 
+```
+void setup() {
+  Wire.begin(SLAVE_ADDRESS); // Join I2C bus with address 0x08
+  Wire.onRequest(requestEvent); // Register callback for master requests
+
+  // RFID initialization
+  SPI.begin();
+  rfid.PCD_Init();
+
+  Serial.begin(9600);
+  Serial.println("RFID Reader ready...");
+}
+```
+
+
 The `setup` function initializes the I2C communication, RFID reader, and serial communication.
 
 ### void setup() { ... }
@@ -934,6 +1458,24 @@ The `setup` function initializes the I2C communication, RFID reader, and serial 
 - Prints a message to the serial monitor indicating that the RFID reader is ready.
 
 ## loop Function
+
+```
+void loop() {
+  // Check for RFID card
+  if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
+    String uid = readRFID(); // Read the card UID
+    Serial.print("Card UID: ");
+    Serial.println(uid);
+
+    if (validateRFID(uid)) { // Check if the UID is valid
+      stopSignal = true; // Set the STOP signal for the master
+    }
+
+    rfid.PICC_HaltA(); // Stop reading the card
+  }
+}
+```
+
 
 The `loop` function continuously checks for RFID cards and processes them.
 
@@ -963,6 +1505,20 @@ The `loop` function continuously checks for RFID cards and processes them.
 
 ## readRFID Function
 
+```
+String readRFID() {
+  String uid = "";
+  for (byte i = 0; i < rfid.uid.size; i++) {
+    uid += String(rfid.uid.uidByte[i], HEX);
+    if (i < rfid.uid.size - 1) {
+      uid += " "; // Add space between bytes
+    }
+  }
+  return uid;
+}
+```
+
+
 The `readRFID` function reads the RFID UID and returns it as a string.
 
 ### String readRFID() { ... }
@@ -984,6 +1540,22 @@ The `readRFID` function reads the RFID UID and returns it as a string.
 - Returns the UID string.
 
 ## validateRFID Function
+
+```
+bool validateRFID(String uid) {
+  // Valid RFID UIDs
+  const String validUIDs[] = {"B8 D5 21 12", "30 9D 7F 14"};
+  for (String validUID : validUIDs) {
+    if (uid.equalsIgnoreCase(validUID)) {
+      Serial.println("Access Granted!");
+      return true;
+    }
+  }
+  Serial.println("Access Denied!");
+  return false;
+}
+```
+
 
 The `validateRFID` function checks if the given UID is valid.
 
@@ -1012,6 +1584,18 @@ The `validateRFID` function checks if the given UID is valid.
 - Returns false if the UID is not valid.
 
 ## requestEvent Function
+
+```
+void requestEvent() {
+  if (stopSignal) {
+    Wire.write(1); // Send STOP signal
+    stopSignal = false; // Reset the signal
+  } else {
+    Wire.write(0); // Send no signal
+  }
+}
+```
+
 
 The `requestEvent` function responds to master requests over I2C.
 
