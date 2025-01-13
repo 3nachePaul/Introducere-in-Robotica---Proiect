@@ -2,7 +2,7 @@
 
 ---
 
-## Introduction  
+# Introduction  
 
 **Project Name:** DIY Safe Box 
 
@@ -40,22 +40,24 @@ All components interact through the master microcontroller, which handles the ap
 
 ---
 
-## Hardware Design  
+# Hardware Design  
 
-**Components List:**  
-- 2 Microcontrollers (e.g., Arduino Uno for master and slave roles)  
-- LCD Display (I2C or SPI communication)  
-- Buttons (increment/confirm)  
-- LEDs (for feedback on guesses)  
-- RFID Reader Module (e.g., MFRC522)  
-- Servo Motor (e.g., SG90)  
-- Resistors  
-- Jumper wires  
-- Breadboard or PCB for circuit assembly  
-- Power supply (e.g., battery or USB)  
-- Switch (for turning the safe on and off)  
+## Bill of Materials: 
+| **Components**| **Quantity** | **Description** | **Datasheet** | **Source/Link** |
+|---------------|--------------|-----------------|---------------|
+| Arduino Uno Microcontroller | 2 | The master coordinates the operation of components by managing I2C communication, PWM, and interrupts. The slave handles the RFID reader and communicates the access status to the master via I2C. | | Personal kit and faculty kit. |
+| OLED Display SSD1306 | 1 | Displays the guessed combination and status messages. | | [SSD1306](https://www.emag.ro/afisaj-oled-ssd1306-oled-i2c-compatibil-arduino-si-raspberry-pi-27x27x4-mm-albastru-c9/pd/D3C7C1YBM/?ref=history-shopping_405308918_158626_1) | 
+| Rotary Encoder with Pushbutton | 1 | It's used to change the digits that are guessed and to submit the answers. It also restarts the game. | | [Rotary Encoder w Pushbutton](https://www.emag.ro/modul-encoder-rotativ-cu-buton-rosfix-360-grade-20-impulsuri-rotire-26x19mm-pzxo-cq39/pd/DYC8PSYBM/?ref=history-shopping_405308918_186146_1) |
+| LEDs | 8 | For feedback on guesses as well as a little display of lights. | | Personal kit. |  
+| RFID Reader Module RC522 | 1 | It's used as the only option to open the safe withouth guessing the code. | | [RC522](https://www.optimusdigital.ro/en/wireless-rfid/67-mfrc522-rfid-module.html?search_query=rfid&results=30)  
+| Servo Motor SG90 | 1| Locks and unlocks the safe. | | Personal kit. |
+| 330Ω Resistors| 8 | Makes sure the LEDs are working properly. | | Personal kit. |  
+| Jumper Wires | N/A | Connects pins to some component by using a soldering kit. | | [Wires](https://www.optimusdigital.ro/ro/fire-fire-mufate/8731-cablu-12p-125-mm-mufat-la-un-singur-capat-20-cm.html?srsltid=AfmBOoqENSjVWkFWeGit2W4nyUuQcLfRHr1fEtEcQdCk4jS_TgpcTiDA)
+| Breadboard | 2 | Used to connect components to a power source and ground. | | Faculty kit.|  
+| Power supply 4xAA Battery Support | 1 | Powers source for the components. | | [Battery Support](https://www.optimusdigital.ro/ro/suporturi-de-baterii/12375-suport-baterii-4-x-aa.html?srsltid=AfmBOoofXrcJw2xVfQ2PUKit96xbxR78K6Rq58X9t2aqwo0t1SOdFPyv) 
+| Switch | 1 | Turns the device on and off. | | Personal item. |
 
-**Circuit Diagram:**  
+## Circuit Diagram:  
 
 (To be added later to visually represent the connections between components.)  
 
@@ -66,7 +68,7 @@ All components interact through the master microcontroller, which handles the ap
 
 ---
 
-## Software Design  
+# Software Design  
 
 **Description:**  
 - **Development Environment:** Arduino IDE.  
@@ -100,7 +102,7 @@ All components interact through the master microcontroller, which handles the ap
 ## Flow  
 
 1. **Turning the Safe On:**  
-   - The switch is turned on, and a message is displayed on the LCD ("Welcome to the Safe Box!").  
+   - The switch is turned on, and a message is displayed on the LCD ("CRACK THE CODE!").  
    - The game begins, and the player can start guessing the combination.  
 
 2. **Guessing the Combination:**  
@@ -125,7 +127,9 @@ All components interact through the master microcontroller, which handles the ap
 ## Resources  
 
 - [Video Inspiration](https://www.youtube.com/watch?v=33jPNMU3N5Q)  
-
+- [Rotary Encoder with pushbutton](https://lastminuteengineers.com/rotary-encoder-arduino-tutorial/)
+- [RFID](https://www.youtube.com/watch?v=pdBrvLGH0PE)
+- [OLED Display](https://randomnerdtutorials.com/guide-for-oled-display-with-arduino/)
 ---
 
 ## Results  
