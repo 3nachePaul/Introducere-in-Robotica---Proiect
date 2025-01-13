@@ -61,14 +61,976 @@ All components interact through the master microcontroller, which handles the ap
 
 # Software Design  
 
-**Description:**  
-- **Development Environment:** Arduino IDE.  
-- **Libraries Used:**  
-  - `Wire.h` for I2C communication.  
-  - `SPI.h` for SPI communication.  
-  - `MFRC522.h` for RFID reader functionality.  
-  - `Servo.h` for servo motor control.  
+## Description:
+- **Development Environment:** Arduino IDE.
 
+## Master Arduino:
+   
+## Libraries Used
+
+### SPI.h
+- The `SPI` library is used for communication with devices that use the Serial Peripheral Interface (SPI) protocol. This protocol is commonly used for communication with sensors, SD cards, and other peripherals that require high-speed data transfer.
+
+### Wire.h
+- The `Wire` library is used for I2C communication. I2C (Inter-Integrated Circuit) is a protocol for communication between microcontrollers and peripheral devices. It is used to communicate with the OLED display in this project.
+
+### Adafruit_GFX.h
+- The `Adafruit_GFX` library provides a common graphics library for various displays. It includes functions for drawing shapes, text, and images on the display. This library is used to handle the graphical content displayed on the OLED screen.
+
+### Adafruit_SSD1306.h
+- The `Adafruit_SSD1306` library is specifically designed for controlling SSD1306-based OLED displays. It provides functions to initialize the display, control pixels, and render text and graphics. This library is used to interface with the OLED display in this project.
+
+### Servo.h
+- The `Servo` library is used to control servo motors. It provides functions to attach a servo motor to a specific pin, set the angle of the servo, and control its movement. In this project, the library is used to control the servo motor that locks and unlocks the safe. 
+
+## Constants
+
+### SCREEN_WIDTH
+- Defines the width of the OLED display in pixels. In this case, it is set to 128 pixels.
+
+### SCREEN_HEIGHT
+- Defines the height of the OLED display in pixels. In this case, it is set to 32 pixels.
+
+### OLED_RESET
+- Defines the reset pin for the OLED display. It is set to -1, indicating that no reset pin is used.
+
+### SLAVE_ADDRESS
+- Defines the I2C address of the slave device. In this case, it is set to 0x08.
+
+### PIN_A
+- Defines the pin number for the encoder's A pin. It is set to pin 3.
+
+### PIN_B
+- Defines the pin number for the encoder's B pin. It is set to pin 4.
+
+### BUTTON_PIN
+- Defines the pin number for the button. It is set to pin 5.
+
+### SERVO_UNLOCK_ANGLE
+- Defines the angle to which the servo motor should move to unlock the safe. It is calculated using the `map` function.
+
+### SERVO_LOCK_ANGLE
+- Defines the angle to which the servo motor should move to lock the safe. It is calculated using the `map` function.
+
+### DEBOUNCE_TIME
+- Defines the debounce time for the button in milliseconds. It is set to 50 milliseconds.
+
+### CORRECT_NUM_LEDS
+- Defines an array of pin numbers for the LEDs that indicate the correct number of digits in the code. The LEDs are connected to pins 13, 11, 9, and 7.
+
+### CORRECT_PLACE_LEDS
+- Defines an array of pin numbers for the LEDs that indicate the correct placement of digits in the code. The LEDs are connected to pins 12, 10, 8, and 6.
+
+## Globals
+
+### display
+- An instance of the `Adafruit_SSD1306` class, used to control the OLED display.
+
+### lockServo
+- An instance of the `Servo` class, used to control the servo motor that locks and unlocks the safe.
+
+### code
+- An array of bytes that stores the correct code to unlock the safe.
+
+### codeGuess
+- An array of bytes that stores the user's guess for the code.
+
+### guessingDigit
+- A byte that stores the current digit being guessed.
+
+### numGuesses
+- A byte that stores the number of guesses made by the user.
+
+### encoderValue
+- A volatile integer that stores the current value of the encoder.
+
+### lastAState
+- A volatile integer that stores the last state of the encoder's A pin.
+
+### isUnlocking
+- A boolean that indicates whether the safe is currently being unlocked.
+
+### isLocking
+- A boolean that indicates whether the safe is currently being locked.
+
+### isDisplayingMessage
+- A boolean that indicates whether a message is currently being displayed on the OLED screen.
+
+### correctGuess
+- A boolean that indicates whether the user's guess is correct.
+
+### oldButtonState
+- A boolean that stores the previous state of the button.
+
+### isDisplayingCrackedMessage
+- A boolean that indicates whether the "Cracked" message is currently being displayed.
+
+### isStartupAnimation
+- A boolean that indicates whether the startup animation is currently being displayed.
+
+### startupAnimationStep
+- An integer that stores the current step of the startup animation.
+
+### buttonPressTime
+- An unsigned long that stores the time when the button was last pressed.
+
+### lastActionTime
+- An unsigned long that stores the time when the last action was performed.
+
+### crackedMessageStartTime
+- An unsigned long that stores the time when the "Cracked" message started being displayed.
+
+### FRAME_DELAY
+- Defines the delay between frames of the animation in milliseconds. It is set to 42 milliseconds.
+
+### FRAME_WIDTH
+- Defines the width of each frame in the animation in pixels. It is set to 32 pixels.
+
+### FRAME_HEIGHT
+- Defines the height of each frame in the animation in pixels. It is set to 32 pixels.
+
+### FRAME_COUNT
+- Defines the number of frames in the animation. It is calculated based on the size of the `frames` array.
+
+### frames
+- A constant array of bytes stored in program memory (PROGMEM) that contains the frames of the animation.
+
+# setup Function
+
+The `setup` function is called once when the microcontroller starts. It initializes various components and sets up the initial state of the system.
+
+### Serial.begin(9600);
+- Initializes the serial communication at a baud rate of 9600. This is used for debugging and communication with the serial monitor.
+
+### if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { ... }
+- Initializes the OLED display with the I2C address 0x3C. If the display initialization fails, it prints an error message to the serial monitor and enters an infinite loop.
+
+### display.clearDisplay();
+- Clears the OLED display.
+
+### lockServo.attach(2);
+- Attaches the servo motor to pin 2.
+
+### Wire.begin();
+- Initializes the I2C communication.
+
+### // Initialize LEDs
+- Initializes the pins for the LEDs and sets them to LOW (off). The LEDs are used to indicate the correct number and placement of digits in the code.
+
+### for (int i = 0; i < 4; i++) { ... }
+- Sets the pin mode for each LED pin to OUTPUT and turns off the LEDs by setting them to LOW.
+
+### // Initialize encoder
+- Initializes the pins for the rotary encoder and sets up interrupts to handle changes in the encoder's state.
+
+### pinMode(PIN_A, INPUT_PULLUP);
+- Sets the pin mode for the encoder's A pin to INPUT_PULLUP.
+
+### pinMode(PIN_B, INPUT_PULLUP);
+- Sets the pin mode for the encoder's B pin to INPUT_PULLUP.
+
+### attachInterrupt(digitalPinToInterrupt(PIN_A), updateEncoder, CHANGE);
+- Attaches an interrupt to the encoder's A pin to call the `updateEncoder` function whenever the state of the pin changes.
+
+### attachInterrupt(digitalPinToInterrupt(PIN_B), updateEncoder, CHANGE);
+- Attaches an interrupt to the encoder's B pin to call the `updateEncoder` function whenever the state of the pin changes.
+
+### // Initialize button
+- Initializes the pin for the button and sets it to INPUT_PULLUP.
+
+### pinMode(BUTTON_PIN, INPUT_PULLUP);
+- Sets the pin mode for the button pin to INPUT_PULLUP.
+
+### randomSeed(analogRead(0));
+- Seeds the random number generator with a value read from an analog pin.
+
+### display.setTextColor(SSD1306_WHITE);
+- Sets the text color for the OLED display to white.
+
+### lockSafe();
+- Calls the `lockSafe` function to lock the safe.
+
+### startupAnimation();
+- Calls the `startupAnimation` function to display the startup animation.
+
+### animateLEDs();
+- Calls the `animateLEDs` function to animate the LEDs.
+
+### generateNewCode();
+- Calls the `generateNewCode` function to generate a new code for the safe.
+
+# loop Function
+
+The `loop` function runs continuously after the `setup` function has completed. It handles the main logic of the program, including checking for correct guesses, handling code input, and controlling the servo motor.
+
+### if (correctGuess) { ... }
+- Checks if the user has guessed the correct code. If `correctGuess` is true, it calls the `unlockSafe` function to unlock the safe and returns to exit the loop.
+
+### if (checkStopSignal()) { ... }
+- Checks if a stop signal has been received (e.g., correct RFID placed). If true, it calls the `displayAccessGrantedMessage` function to display the "Access - - - - Granted" message and the `unlockSafe` function to unlock the safe, then returns to exit the loop.
+
+### handleCodeInput();
+- Calls the `handleCodeInput` function to process the user's input for the code.
+
+### numGuesses++;
+- Increments the `numGuesses` variable to keep track of the number of guesses made by the user.
+
+### evaluateGuess();
+- Calls the `evaluateGuess` function to evaluate the user's guess against the correct code.
+
+### resetGuess();
+- Calls the `resetGuess` function to reset the user's guess.
+
+### updateDisplayCode();
+- Calls the `updateDisplayCode` function to update the code displayed on the OLED screen.
+
+### // Handle non-blocking delays
+- Handles non-blocking delays for the servo motor to ensure smooth operation without using the `delay` function.
+
+### if (isUnlocking && millis() - lastActionTime >= 500) { ... }
+- Checks if the safe is in the process of unlocking and if 500 milliseconds have passed since the last action. If true, it sets the servo motor to the unlock angle, updates `isUnlocking` to false, and records the current time in `lastActionTime`.
+
+### if (isLocking && millis() - lastActionTime >= 500) { ... }
+- Checks if the safe is in the process of locking and if 500 milliseconds have passed since the last action. If true, it sets the servo motor to the lock angle, updates `isLocking` to false, and records the current time in `lastActionTime`.
+
+
+# updateDisplayCode Function
+
+The `updateDisplayCode` function updates the code displayed on the OLED screen based on the user's input and the current state of the encoder.
+
+### display.clearDisplay();
+- Clears the OLED display to prepare for new content.
+
+### String temp;
+- Creates a temporary string to hold the code to be displayed.
+
+### for (int i = 0; i < 4; i++) { ... }
+- Loops through each digit of the code (4 digits in total).
+
+### if (i < guessingDigit) { ... }
+- Checks if the current digit index is less than the `guessingDigit` index. If true, it appends the corresponding digit from the `codeGuess` array to the `temp` string.
+
+### else if (i == guessingDigit) { ... }
+- Checks if the current digit index is equal to the `guessingDigit` index. If true, it appends the current value of the encoder (modulo 10) to the `temp` string. This represents the digit currently being guessed.
+
+### else { ... }
+- If the current digit index is greater than the `guessingDigit` index, it appends "0" to the `temp` string.
+
+### display.setTextSize(2);
+- Sets the text size for the OLED display to 2.
+
+### display.setCursor(20, 10);
+- Sets the cursor position for the OLED display to coordinates (20, 10).
+
+### display.println(temp);
+- Prints the `temp` string (the code) to the OLED display.
+
+### display.display();
+- Displays the content on the OLED screen.
+
+
+# generateNewCode Function
+
+The `generateNewCode` function generates a new random 4-digit code and prints it to the serial monitor.
+
+### Serial.print("Code: ");
+- Prints the string "Code: " to the serial monitor to indicate the start of the new code.
+
+### for (int i = 0; i < 4; i++) { ... }
+- Loops through each digit of the code (4 digits in total).
+
+### code[i] = random(0, 10);
+- Generates a random digit between 0 and 9 and assigns it to the `code` array at index `i`.
+
+### Serial.print(code[i]);
+- Prints the generated digit to the serial monitor.
+
+### Serial.println();
+- Prints a newline character to the serial monitor to end the line after printing the full code.
+
+# handleCodeInput Function
+
+The `handleCodeInput` function handles the user's input for guessing the code. It allows the user to set each digit of the code using a rotary encoder and a button.
+
+### for (int i = 0; i < 4; i++) { ... }
+- Loops through each digit of the code (4 digits in total).
+
+### guessingDigit = i;
+- Sets the current digit being guessed to `i`.
+
+### bool confirmed = false;
+- Initializes a boolean variable `confirmed` to `false`. This variable will be used to determine when the user has confirmed their input for the current digit.
+
+### while (!confirmed) { ... }
+- Enters a loop that continues until the user confirms their input for the current digit.
+
+### bool buttonState = digitalRead(BUTTON_PIN);
+- Reads the current state of the button and stores it in the `buttonState` variable.
+
+### if (buttonState != oldButtonState && millis() - buttonPressTime >= DEBOUNCE_TIME) { ... }
+- Checks if the button state has changed and if the debounce time has passed since the last button press. This helps to avoid false triggers due to button bounce.
+
+### buttonPressTime = millis();
+- Updates the `buttonPressTime` variable to the current time.
+
+### oldButtonState = buttonState;
+- Updates the `oldButtonState` variable to the current button state.
+
+### if (buttonState == LOW) { ... }
+- Checks if the button is pressed (assuming LOW indicates a pressed state).
+
+### codeGuess[i] = abs(encoderValue) % 10;
+- Sets the current digit of the `codeGuess` array to the value of the encoder (modulo 10).
+
+### confirmed = true;
+- Sets the `confirmed` variable to `true` to exit the loop and move on to the next digit.
+
+### updateDisplayCode();
+- Calls the `updateDisplayCode` function to update the code displayed on the OLED screen.
+
+
+# displayAccessGrantedMessage Function
+
+The `displayAccessGrantedMessage` function displays an "Access Granted!" message on the OLED screen for 5 seconds.
+
+### display.clearDisplay();
+- Clears the OLED display to prepare for new content.
+
+### display.setTextSize(1);
+- Sets the text size for the OLED display to 1.
+
+### display.setCursor(10, 10);
+- Sets the cursor position for the OLED display to coordinates (10, 10).
+
+### display.println(F("Access Granted!"));
+- Prints the "Access Granted!" message to the OLED display.
+
+### display.display();
+- Displays the content on the OLED screen.
+
+### unsigned long startMillis = millis();
+- Records the current time in milliseconds.
+
+### while (millis() - startMillis < 5000) { ... }
+- Enters a loop that continues until 5000 milliseconds (5 seconds) have passed. This effectively creates a delay without using the `delay` function.
+
+### display.clearDisplay();
+- Clears the OLED display after the 5-second delay.
+
+### display.display();
+- Updates the OLED display to show the cleared screen.
+
+# evaluateGuess Function
+
+The `evaluateGuess` function evaluates the user's guess against the correct code and updates the LEDs and display accordingly.
+
+### int correctNum = 0;
+- Initializes a counter for the number of correct digits in the guess.
+
+### int correctPlace = 0;
+- Initializes a counter for the number of digits in the correct place.
+
+### bool usedDigits[4] = {false};
+- Creates an array to keep track of which digits in the code have already been matched.
+
+### for (int i = 0; i < 4; i++) { ... }
+- Loops through each digit of the user's guess.
+
+### for (int j = 0; j < 4; j++) { ... }
+- Loops through each digit of the correct code.
+
+### if (codeGuess[i] == code[j] && !usedDigits[j]) { ... }
+- Checks if the current digit of the guess matches a digit in the correct code that hasn't been used yet. If true, increments the `correctNum` counter, marks the digit as used, and breaks out of the inner loop.
+
+### if (codeGuess[i] == code[i]) { ... }
+- Checks if the current digit of the guess is in the correct place. If true, increments the `correctPlace` counter.
+
+### updateLEDs(correctNum, correctPlace);
+- Calls the `updateLEDs` function to update the LEDs based on the number of correct digits and correct placements.
+
+### if (correctPlace == 4) { ... }
+- Checks if all 4 digits are in the correct place. If true, sets `correctGuess` to true, clears the display, and shows the "Cracked!" message.
+
+### correctGuess = true;
+- Sets the `correctGuess` variable to true, indicating that the user has guessed the correct code.
+
+### display.clearDisplay();
+- Clears the OLED display.
+
+### display.setCursor(20, 10);
+- Sets the cursor position for the OLED display to coordinates (20, 10).
+
+### display.println(F("Cracked!"));
+- Prints the "Cracked!" message to the OLED display.
+
+### display.display();
+- Displays the content on the OLED screen.
+
+### isDisplayingCrackedMessage = true;
+- Sets the `isDisplayingCrackedMessage` variable to true, indicating that the "Cracked!" message is being displayed.
+
+### crackedMessageStartTime = millis();
+- Records the current time in milliseconds to track how long the "Cracked!" message has been displayed.
+
+# updateLEDs Function
+
+The `updateLEDs` function updates the state of the LEDs based on the number of correct digits and correct placements in the user's guess.
+
+### void updateLEDs(int correctNum, int correctPlace) { ... }
+- Defines the function with parameters `correctNum` (number of correct digits) and `correctPlace` (number of digits in the correct place).
+
+### for (int i = 0; i < 4; i++) { ... }
+- Loops through each LED (4 LEDs in total).
+
+### digitalWrite(CORRECT_NUM_LEDS[i], i < correctNum ? HIGH : LOW);
+- Sets the state of the LEDs indicating the correct number of digits. If `i` is less than `correctNum`, the LED is turned on (HIGH); otherwise, it is turned off (LOW).
+
+### digitalWrite(CORRECT_PLACE_LEDS[i], i < correctPlace ? HIGH : LOW);
+- Sets the state of the LEDs indicating the correct placement of digits. If `i` is less than `correctPlace`, the LED is turned on (HIGH); otherwise, it is turned off (LOW).
+
+# unlockSafe Function
+
+The `unlockSafe` function unlocks the safe, displays an "Unlocked!" message, and performs LED animations.
+
+### void unlockSafe() { ... }
+- Defines the function to unlock the safe.
+
+### lockServo.write(SERVO_UNLOCK_ANGLE);
+- Sets the servo motor to the unlock angle.
+
+### isUnlocking = true;
+- Sets the `isUnlocking` variable to true, indicating that the safe is in the process of unlocking.
+
+### lastActionTime = millis();
+- Records the current time in milliseconds.
+
+### display.clearDisplay();
+- Clears the OLED display.
+
+### display.setTextSize(1);
+- Sets the text size for the OLED display to 1.
+
+### display.setCursor(35, 10);
+- Sets the cursor position for the OLED display to coordinates (35, 10).
+
+### display.println(F("Unlocked!"));
+- Prints the "Unlocked!" message to the OLED display.
+
+### display.display();
+- Displays the content on the OLED screen.
+
+### unsigned long startMillis = millis();
+- Records the current time in milliseconds.
+
+### while (millis() - startMillis < 3000) { ... }
+- Enters a loop that continues until 3000 milliseconds (3 seconds) have passed. This effectively creates a delay without using the `delay` function.
+
+### display.clearDisplay();
+- Clears the OLED display after the 3-second delay.
+
+### display.display();
+- Updates the OLED display to show the cleared screen.
+
+### isDisplayingMessage = false;
+- Sets the `isDisplayingMessage` variable to false, indicating that no message is currently being displayed.
+
+### animateLEDs();
+- Calls the `animateLEDs` function to perform LED animations.
+
+### displayButtonPressAnimation();
+- Calls the `displayButtonPressAnimation` function to display the button press animation.
+
+# displayButtonPressAnimation Function
+
+The `displayButtonPressAnimation` function displays an animation on the OLED screen and waits for the user to press a button to start a new round.
+
+### void displayButtonPressAnimation() { ... }
+- Defines the function to display the button press animation.
+
+### const char* staticText = "Press the button";
+- Defines a static text message to be displayed on the OLED screen.
+
+### int16_t textX = (SCREEN_WIDTH - strlen(staticText) * 6) / 2;
+- Calculates the horizontal position to center the static text on the screen.
+
+### int16_t textY = 0;
+- Sets the vertical position for the static text.
+
+### int frame = 0;
+- Initializes the frame counter for the animation.
+
+### unsigned long lastFrameTime = millis();
+- Records the current time in milliseconds for frame timing.
+
+### unsigned long lastScrollTime = millis();
+- Records the current time in milliseconds for scroll timing (not used in this function).
+
+### while (true) { ... }
+- Enters an infinite loop to continuously update the display and check for button presses.
+
+### unsigned long currentMillis = millis();
+- Records the current time in milliseconds.
+
+### if (currentMillis - lastFrameTime >= 42) { ... }
+- Checks if 42 milliseconds have passed since the last frame update. If true, updates the frame.
+
+### lastFrameTime = currentMillis;
+- Updates the `lastFrameTime` variable to the current time.
+
+### display.clearDisplay();
+- Clears the OLED display.
+
+### display.setTextSize(1);
+- Sets the text size for the OLED display to 1.
+
+### display.setCursor(textX, textY);
+- Sets the cursor position for the OLED display to the calculated horizontal position and fixed vertical position.
+
+### display.println(staticText);
+- Prints the static text message to the OLED display.
+
+### display.drawBitmap(32, (SCREEN_HEIGHT - FRAME_HEIGHT) / 2, frames[frame], FRAME_WIDTH, FRAME_HEIGHT, 1);
+- Draws the current frame of the animation on the OLED display.
+
+### display.display();
+- Displays the content on the OLED screen.
+
+### frame = (frame + 1) % FRAME_COUNT;
+- Advances to the next frame of the animation, looping back to the first frame if necessary.
+
+### bool buttonState = digitalRead(BUTTON_PIN);
+- Reads the current state of the button and stores it in the `buttonState` variable.
+
+### if (buttonState != oldButtonState && millis() - lastActionTime >= DEBOUNCE_TIME) { ... }
+- Checks if the button state has changed and if the debounce time has passed since the last action. This helps to avoid false triggers due to button bounce.
+
+### buttonPressTime = millis();
+- Updates the `buttonPressTime` variable to the current time.
+
+### oldButtonState = buttonState;
+- Updates the `oldButtonState` variable to the current button state.
+
+### if (buttonState == LOW) { ... }
+- Checks if the button is pressed (assuming LOW indicates a pressed state).
+
+### lockSafe();
+- Calls the `lockSafe` function to lock the safe.
+
+### break;
+- Exits the infinite loop to end the function.
+
+# waitForLock Function
+
+The `waitForLock` function waits for the user to press a button to lock the safe.
+
+### void waitForLock() { ... }
+- Defines the function to wait for the lock action.
+
+### bool locked = false;
+- Initializes a boolean variable `locked` to `false`.
+
+### while (!locked) { ... }
+- Enters a loop that continues until the safe is locked.
+
+### bool buttonState = digitalRead(BUTTON_PIN);
+- Reads the current state of the button and stores it in the `buttonState` variable.
+
+### if (buttonState != oldButtonState && millis() - buttonPressTime >= DEBOUNCE_TIME) { ... }
+- Checks if the button state has changed and if the debounce time has passed since the last button press. This helps to avoid false triggers due to button bounce.
+
+### buttonPressTime = millis();
+- Updates the `buttonPressTime` variable to the current time.
+
+### oldButtonState = buttonState;
+- Updates the `oldButtonState` variable to the current button state.
+
+### if (buttonState == LOW) { ... }
+- Checks if the button is pressed (assuming LOW indicates a pressed state).
+
+### lockSafe();
+- Calls the `lockSafe` function to lock the safe.
+
+### locked = true;
+- Sets the `locked` variable to `true` to exit the loop.
+
+# startupAnimation Function
+
+The `startupAnimation` function displays a startup animation with the messages "Crack", "The", and "Code" on the OLED screen.
+
+### void startupAnimation() { ... }
+- Defines the function to display the startup animation.
+
+### const char* messages[] = {"Crack", "The", "Code"};
+- Defines an array of messages to be displayed during the startup animation.
+
+### for (int i = 0; i < 3; i++) { ... }
+- Loops through each message in the array.
+
+### display.clearDisplay();
+- Clears the OLED display.
+
+### display.setTextSize(2);
+- Sets the text size for the OLED display to 2.
+
+### display.setCursor(40, 10);
+- Sets the cursor position for the OLED display to coordinates (40, 10).
+
+### display.println(messages[i]);
+- Prints the current message to the OLED display.
+
+### display.display();
+- Displays the content on the OLED screen.
+
+### unsigned long startMillis = millis();
+- Records the current time in milliseconds.
+
+### while (millis() - startMillis < 500) { ... }
+- Enters a loop that continues until 500 milliseconds have passed. This effectively creates a delay without using the `delay` function.
+
+# updateEncoder Function
+
+The `updateEncoder` function updates the encoder value based on the state of the encoder pins.
+
+### void updateEncoder() { ... }
+- Defines the function to update the encoder value.
+
+### int currentAState = digitalRead(PIN_A);
+- Reads the current state of the encoder's A pin and stores it in the `currentAState` variable.
+
+### if (currentAState != lastAState) { ... }
+- Checks if the state of the encoder's A pin has changed.
+
+### encoderValue += (digitalRead(PIN_B) != currentAState) ? 1 : -1;
+- Updates the encoder value based on the state of the encoder's B pin. If the state of the B pin is different from the current state of the A pin, the encoder value is incremented; otherwise, it is decremented.
+
+### lastAState = currentAState;
+- Updates the `lastAState` variable to the current state of the encoder's A pin.
+
+# checkStopSignal Function
+
+The `checkStopSignal` function checks for a stop signal from a slave device over I2C communication.
+
+### bool checkStopSignal() { ... }
+- Defines the function to check for a stop signal.
+
+### Wire.requestFrom(SLAVE_ADDRESS, 1);
+- Requests 1 byte of data from the slave device with the specified I2C address.
+
+### while (Wire.available()) { ... }
+- Enters a loop that continues while data is available from the slave device.
+
+### return Wire.read() == 1;
+- Reads the data from the slave device and returns `true` if the data is equal to 1, indicating a stop signal.
+
+### return false;
+- Returns `false` if no data is available or the data is not equal to 1.
+
+# lockSafe Function
+
+The `lockSafe` function locks the safe, displays a "Locked" message, and resets the game.
+
+### void lockSafe() { ... }
+- Defines the function to lock the safe.
+
+### lockServo.write(SERVO_LOCK_ANGLE);
+- Sets the servo motor to the lock angle.
+
+### isLocking = true;
+- Sets the `isLocking` variable to true, indicating that the safe is in the process of locking.
+
+### lastActionTime = millis();
+- Records the current time in milliseconds.
+
+### display.clearDisplay();
+- Clears the OLED display.
+
+### display.setCursor(30, 10);
+- Sets the cursor position for the OLED display to coordinates (30, 10).
+
+### display.println(F("Locked"));
+- Prints the "Locked" message to the OLED display.
+
+### display.display();
+- Displays the content on the OLED screen.
+
+### isDisplayingMessage = true;
+- Sets the `isDisplayingMessage` variable to true, indicating that a message is currently being displayed.
+
+### lastActionTime = millis();
+- Updates the `lastActionTime` variable to the current time.
+
+### resetGame();
+- Calls the `resetGame` function to reset the game.
+
+# resetGame Function
+
+The `resetGame` function resets the game state, generates a new code, and updates the LEDs.
+
+### void resetGame() { ... }
+- Defines the function to reset the game.
+
+### correctGuess = false;
+- Sets the `correctGuess` variable to false, indicating that the correct code has not been guessed.
+
+### resetGuess();
+- Calls the `resetGuess` function to reset the user's guess.
+
+### generateNewCode();
+- Calls the `generateNewCode` function to generate a new code for the safe.
+
+### updateLEDs(0, 0);
+- Calls the `updateLEDs` function to turn off all the LEDs.
+
+# resetGuess Function
+
+The `resetGuess` function resets the user's guess and the encoder value.
+
+### void resetGuess() { ... }
+- Defines the function to reset the user's guess.
+
+### encoderValue = 0;
+- Resets the encoder value to 0.
+
+### guessingDigit = 0;
+- Resets the current digit being guessed to 0.
+
+### for (int i = 0; i < 4; i++) { ... }
+- Loops through each digit of the guess (4 digits in total).
+
+### codeGuess[i] = 0;
+- Resets each digit of the `codeGuess` array to 0.
+
+# animateLEDs Function
+
+The `animateLEDs` function performs an LED animation sequence using non-blocking delays.
+
+### void animateLEDs() { ... }
+- Defines the function to animate the LEDs.
+
+### unsigned long startTime = millis();
+- Records the start time of the animation in milliseconds.
+
+### unsigned long elapsedTime = 0;
+- Initializes the elapsed time variable to 0.
+
+### unsigned long animationDuration = 2000;
+- Sets the total duration for the animation to 2000 milliseconds (2 seconds).
+
+### unsigned long interval = 200;
+- Sets the delay between each LED action to 200 milliseconds.
+
+### int numLeds = 4;
+- Defines the number of LEDs in each array.
+
+### while (elapsedTime < animationDuration) { ... }
+- Enters a loop that continues until the total animation duration has elapsed.
+
+### elapsedTime = millis() - startTime;
+- Updates the elapsed time by calculating the difference between the current time and the start time.
+
+### if (elapsedTime < (interval * numLeds)) { ... }
+- Step 1: Lights up the LEDs in `CORRECT_NUM_LEDS` one by one.
+
+### int ledIndex = elapsedTime / interval;
+- Determines which LED to turn on based on the elapsed time.
+
+### if (ledIndex < numLeds) { ... }
+- Checks if the calculated LED index is within the range of the number of LEDs.
+
+### digitalWrite(CORRECT_NUM_LEDS[ledIndex], HIGH);
+- Turns on the LED in `CORRECT_NUM_LEDS` at the calculated index.
+
+### else if (elapsedTime < (interval * (numLeds + numLeds))) { ... }
+- Step 2: Lights up the LEDs in `CORRECT_PLACE_LEDS` after all `CORRECT_NUM_LEDS` are lit.
+
+### int ledIndex = (elapsedTime - (interval * numLeds)) / interval;
+- Determines which LED to turn on from `CORRECT_PLACE_LEDS` based on the elapsed time.
+
+### digitalWrite(CORRECT_PLACE_LEDS[ledIndex], HIGH);
+- Turns on the LED in `CORRECT_PLACE_LEDS` at the calculated index.
+
+### else if (elapsedTime < animationDuration + (interval * numLeds)) { ... }
+- Step 3: Turns off the LEDs in `CORRECT_PLACE_LEDS` in reverse order after the animation duration.
+
+### int ledIndex = (elapsedTime - animationDuration) / interval;
+- Determines which LED to turn off in reverse order from `CORRECT_PLACE_LEDS` based on the elapsed time.
+
+### digitalWrite(CORRECT_PLACE_LEDS[numLeds - 1 - ledIndex], LOW);
+- Turns off the LED in reverse order from `CORRECT_PLACE_LEDS` at the calculated index.
+
+### else { ... }
+- Turns off the LEDs in `CORRECT_NUM_LEDS` in reverse order after the animation duration.
+
+### int ledIndex = (elapsedTime - animationDuration - (interval * numLeds)) / interval;
+- Determines which LED to turn off in reverse order from `CORRECT_NUM_LEDS` based on the elapsed time.
+
+### digitalWrite(CORRECT_NUM_LEDS[numLeds - 1 - ledIndex], LOW);
+- Turns off the LED in reverse order from `CORRECT_NUM_LEDS` at the calculated index.
+
+### for (int i = 0; i < numLeds; i++) { ... }
+- After the full 2 seconds, ensures all LEDs are off.
+
+### digitalWrite(CORRECT_NUM_LEDS[i], LOW);
+- Turns off the LED in `CORRECT_NUM_LEDS` at index `i`.
+
+### digitalWrite(CORRECT_PLACE_LEDS[i], LOW);
+- Turns off the LED in `CORRECT_PLACE_LEDS` at index `i`.
+
+# Slave Arduino:
+
+# RFID Reader and I2C Communication
+
+This code sets up an RFID reader using the MFRC522 library and communicates with a master device over I2C. It reads RFID card UIDs, validates them, and sends a stop signal to the master if a valid UID is detected.
+
+## Libraries and Definitions
+
+### #include <Wire.h>
+- Includes the Wire library for I2C communication.
+
+### #include <SPI.h>
+- Includes the SPI library for SPI communication.
+
+### #include <MFRC522.h>
+- Includes the MFRC522 library for RFID functionality.
+
+### #define SLAVE_ADDRESS 0x08
+- Defines the I2C slave address as 0x08.
+
+### #define RST_PIN 9
+- Defines the reset pin for the MFRC522 RFID reader.
+
+### #define SS_PIN 10
+- Defines the slave select pin for the MFRC522 RFID reader.
+
+### MFRC522 rfid(SS_PIN, RST_PIN);
+- Creates an instance of the MFRC522 class with the specified pins.
+
+### volatile bool stopSignal = false;
+- Declares a volatile boolean variable to store the stop signal state.
+
+## setup Function
+
+The `setup` function initializes the I2C communication, RFID reader, and serial communication.
+
+### void setup() { ... }
+- Defines the setup function.
+
+### Wire.begin(SLAVE_ADDRESS);
+- Joins the I2C bus with the specified slave address.
+
+### Wire.onRequest(requestEvent);
+- Registers the `requestEvent` callback function to respond to master requests.
+
+### SPI.begin();
+- Initializes the SPI communication.
+
+### rfid.PCD_Init();
+- Initializes the RFID reader.
+
+### Serial.begin(9600);
+- Initializes the serial communication at a baud rate of 9600.
+
+### Serial.println("RFID Reader ready...");
+- Prints a message to the serial monitor indicating that the RFID reader is ready.
+
+## loop Function
+
+The `loop` function continuously checks for RFID cards and processes them.
+
+### void loop() { ... }
+- Defines the loop function.
+
+### if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) { ... }
+- Checks if a new RFID card is present and reads its UID.
+
+### String uid = readRFID();
+- Calls the `readRFID` function to read the card UID and stores it in the `uid` variable.
+
+### Serial.print("Card UID: ");
+- Prints "Card UID: " to the serial monitor.
+
+### Serial.println(uid);
+- Prints the card UID to the serial monitor.
+
+### if (validateRFID(uid)) { ... }
+- Calls the `validateRFID` function to check if the UID is valid.
+
+### stopSignal = true;
+- Sets the stop signal to true if the UID is valid.
+
+### rfid.PICC_HaltA();
+- Stops reading the card.
+
+## readRFID Function
+
+The `readRFID` function reads the RFID UID and returns it as a string.
+
+### String readRFID() { ... }
+- Defines the function to read the RFID UID.
+
+### String uid = "";
+- Initializes an empty string to store the UID.
+
+### for (byte i = 0; i < rfid.uid.size; i++) { ... }
+- Loops through each byte of the UID.
+
+### uid += String(rfid.uid.uidByte[i], HEX);
+- Converts each byte to a hexadecimal string and appends it to the UID string.
+
+### if (i < rfid.uid.size - 1) { ... }
+- Adds a space between bytes, except after the last byte.
+
+### return uid;
+- Returns the UID string.
+
+## validateRFID Function
+
+The `validateRFID` function checks if the given UID is valid.
+
+### bool validateRFID(String uid) { ... }
+- Defines the function to validate the RFID UID.
+
+### const String validUIDs[] = {"B8 D5 21 12", "30 9D 7F 14"};
+- Defines an array of valid UIDs.
+
+### for (String validUID : validUIDs) { ... }
+- Loops through each valid UID.
+
+### if (uid.equalsIgnoreCase(validUID)) { ... }
+- Checks if the given UID matches a valid UID (case-insensitive).
+
+### Serial.println("Access Granted!");
+- Prints "Access Granted!" to the serial monitor if the UID is valid.
+
+### return true;
+- Returns true if the UID is valid.
+
+### Serial.println("Access Denied!");
+- Prints "Access Denied!" to the serial monitor if the UID is not valid.
+
+### return false;
+- Returns false if the UID is not valid.
+
+## requestEvent Function
+
+The `requestEvent` function responds to master requests over I2C.
+
+### void requestEvent() { ... }
+- Defines the callback function for master requests.
+
+### if (stopSignal) { ... }
+- Checks if the stop signal is set.
+
+### Wire.write(1);
+- Sends a stop signal (1) to the master.
+
+### stopSignal = false;
+- Resets the stop signal.
+
+### Wire.write(0);
+- Sends no signal (0) to the master if the stop signal is not set.
+
+---
 **Master Microcontroller Responsibilities:**  
 1. Displaying status messages and user input on the LCD.  
 2. Managing buttons for user input.  
