@@ -25,16 +25,7 @@ I wanted to make a safe and then I found a game made by someone and I wanted to 
 
 (To be added at a later stage of the project)
 
-| **Modules**            | **Description** |  
-|------------------------|-----------------|  
-| **LCD** (I2C/SPI)      | Displays the guessed combination and status messages (e.g., "Wrong code!" or "Safe opened"). |  
-| **Buttons**            | Allow the user to select and confirm the entered value. |  
-| **Servo Motor**        | Controls the locking/unlocking mechanism of the safe. |  
-| **Microcontroller (Master)** | Coordinates the operation of components by managing I2C communication, PWM, and interrupts. |  
-| **Microcontroller (Slave)** | Handles the RFID reader and communicates the access status to the master via I2C. |  
-| **LEDs**               | Indicate correct numbers and their positions during guessing. |  
-| **RFID Reader**        | Provides an additional method for safe access by scanning RFID cards. |  
-| **Switch**             | Turns the safe on and off, initializing and resetting the game. |  
+
 
 All components interact through the master microcontroller, which handles the application logic and communication with the slave microcontroller for RFID access validation.
 
@@ -44,7 +35,7 @@ All components interact through the master microcontroller, which handles the ap
 
 ## Bill of Materials: 
 | **Components**| **Quantity** | **Description** | **Datasheet** | **Source/Link** |
-|---------------|--------------|-----------------|---------------|
+|---------------|--------------|-----------------|---------------|-----------------|
 | Arduino Uno Microcontroller | 2 | The master coordinates the operation of components by managing I2C communication, PWM, and interrupts. The slave handles the RFID reader and communicates the access status to the master via I2C. | | Personal kit and faculty kit. |
 | OLED Display SSD1306 | 1 | Displays the guessed combination and status messages. | | [SSD1306](https://www.emag.ro/afisaj-oled-ssd1306-oled-i2c-compatibil-arduino-si-raspberry-pi-27x27x4-mm-albastru-c9/pd/D3C7C1YBM/?ref=history-shopping_405308918_158626_1) | 
 | Rotary Encoder with Pushbutton | 1 | It's used to change the digits that are guessed and to submit the answers. It also restarts the game. | | [Rotary Encoder w Pushbutton](https://www.emag.ro/modul-encoder-rotativ-cu-buton-rosfix-360-grade-20-impulsuri-rotire-26x19mm-pzxo-cq39/pd/DYC8PSYBM/?ref=history-shopping_405308918_186146_1) |
