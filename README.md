@@ -54,6 +54,7 @@ All components interact through the master microcontroller, which handles the ap
 | Power supply 4xAA Battery Support | 1 | Powers source for the components. | | [Battery Support](https://www.optimusdigital.ro/ro/suporturi-de-baterii/12375-suport-baterii-4-x-aa.html?srsltid=AfmBOoofXrcJw2xVfQ2PUKit96xbxR78K6Rq58X9t2aqwo0t1SOdFPyv) 
 | Switch | 1 | Turns the device on and off. | | Personal item. |
 </details>
+
 ## Circuit Diagram:  
 
 (To be added later to visually represent the connections between components.)  
