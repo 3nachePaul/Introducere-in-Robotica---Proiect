@@ -1871,11 +1871,16 @@ The `requestEvent` function responds to master requests over I2C.
   
 ## Demo video of the functionality
 
+
+### Cracking The Code
+
 [![Thumbnail for Shorts o41zwCnez3Y](https://img.youtube.com/vi/o41zwCnez3Y/0.jpg)](https://youtube.com/shorts/o41zwCnez3Y?feature=share)
 
 [![Thumbnail for Shorts 2kCUnKZMGy0](https://img.youtube.com/vi/2kCUnKZMGy0/0.jpg)](https://youtube.com/shorts/2kCUnKZMGy0?feature=share)
 
 [![Thumbnail for Shorts skhJeEpMiGY](https://img.youtube.com/vi/skhJeEpMiGY/0.jpg)](https://youtube.com/shorts/skhJeEpMiGY?feature=share)
+
+### Using the RFID card to unlock
 
 [![Thumbnail for Shorts I1vGTi615sc](https://img.youtube.com/vi/I1vGTi615sc/0.jpg)](https://youtube.com/shorts/I1vGTi615sc?feature=share)
 
@@ -1910,3 +1915,8 @@ The `requestEvent` function responds to master requests over I2C.
 3. Practical application of PWM for servo motor control and interrupts for button handling.  
 4. An educational project that applies knowledge from laboratory exercises and demonstrates a real-world use case.  
    </details>
+
+## Other
+
+Because the microcontrollers, the breadboards and the battery support are not fiex in place once the safe is lifted the connection
+of the components is most likely to be distrubed, it is recommended to put the safe on a stable surface to use it for now.
