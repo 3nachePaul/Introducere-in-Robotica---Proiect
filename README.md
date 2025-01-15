@@ -84,11 +84,39 @@ All components interact through the master microcontroller, which handles the ap
 Isketched 13cm length squares on a 2mm tichness mdf board that I cut suing 2 types of saw and I made the holes using a hand drill.
 The squares were attached to each other using corner guard and screws.
 
+
+
 ## Soldering
 
 I soldered the resistors to the leds, the pin header connector to the RC522 and the wires: to the leds, between them and to a pin header connector.
 I used a [plusivo soldering kit](https://www.optimusdigital.ro/ro/kituri/12919-kit-plusivo-pentru-lipit-eu-v5-cu-multimetru-digital.html?search_query=kit+ipit&results=33). 
+
+
+</details>
+
+<details>
+   <summary>Hardware Images</summary>
    
+   ![](Images/p1.jpg)
+   ![](Images/p2.jpg)
+   ![](Images/p3.jpg)
+   ![](Images/p4.jpg)
+   ![](Images/p5.jpg)
+   ![](Images/p6.jpg)
+   ![](Images/p7.jpg)
+   ![](Images/p8.jpg)
+   ![](Images/p9.jpg)
+   ![](Images/p10.jpg)
+   ![](Images/p11.jpg)
+   ![](Images/p12.jpg)
+   ![](Images/p13.jpg)
+   ![](Images/p14.jpg)
+   ![](Images/p15.jpg)
+   ![](Images/p16.jpg)
+   ![](Images/p17.jpg)
+   ![](Images/p18.jpg)
+   ![](Images/p19.jpg)
+   ![](Images/p20.jpg)
 </details>
 
 </details>
