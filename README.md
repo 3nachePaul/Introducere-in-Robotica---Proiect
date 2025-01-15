@@ -59,6 +59,43 @@ All components interact through the master microcontroller, which handles the ap
 </details>
 
 <details>
+   <summary>Pin Configuration</summary>
+
+   ## Pin Configuration
+
+   ### Master Arduino
+   
+   | Component            | Pins Used             |
+   |----------------------|-----------------------|
+   | Green LED            | 13                    |
+   | Red LED              | 12                    |
+   | Blue LED             | 11                    |
+   | Yellow LED           | 10                    |
+   | White LED            | 9                     |
+   | Orange LED           | 8                     |
+   | Pink LED             | 7                     |
+   | Purple LED           | 6                     |
+   | Button               | 5                     |
+   | Rotary Encoder SW    | 4                     |
+   | Rotary Encoder CLK   | 3                     |
+   | Rotary Encoder DT    | 3                     |
+   | Servo Motor          | 2                     |
+   | I2C Communication    | A5 (SCL), A4 (SDA)    |
+   
+### Slave Arduino
+
+| Component            | Pins Used             |
+|----------------------|-----------------------|
+| RC522 SDA (SS)       | 10                    |
+| RC522 SCK            | 13                    |
+| RC522 MOSI           | 11                    |
+| RC522 MISO           | 12                    |
+| RC522 RST            | 9                     |
+| I2C Communication    | A5 (SCL), A4 (SDA)    |
+
+</details>
+
+<details>
    <summary>Circuit</summary>
 
 ## Circuit Diagram:  
