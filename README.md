@@ -1985,10 +1985,18 @@ The `requestEvent` function responds to master requests over I2C.
    - **SPI:** For communication between the slave and RFID reader.  
 3. Practical application of PWM for servo motor control and interrupts for button handling.  
 4. An educational project that applies knowledge from laboratory exercises and demonstrates a real-world use case.  
-   </details>
+ </details>
+
+---
+
+<details>
+   <summary>Other</summary>
+
 
 ## Other
 
 -Because the microcontrollers, the breadboards and the battery support are not fiex in place once the safe is lifted the connection
 of the components is most likely to be distrubed, it is recommended to put the safe on a stable surface to use it for now.
 - If I were to redo the project I would get larger walls for the safe as well as better wire management from the very begining.
+  </details>
+ 
