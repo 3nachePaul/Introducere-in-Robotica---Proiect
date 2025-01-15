@@ -91,6 +91,25 @@ The squares were attached to each other using corner guard and screws.
 I soldered the resistors to the leds, the pin header connector to the RC522 and the wires: to the leds, between them and to a pin header connector.
 I used a [plusivo soldering kit](https://www.optimusdigital.ro/ro/kituri/12919-kit-plusivo-pentru-lipit-eu-v5-cu-multimetru-digital.html?search_query=kit+ipit&results=33). 
 
+## Images and Videos
+
+ ![](Images/placa_mdf.jpg)
+ ![](Images/fierastrau_mare.jpg)
+ ![](Images/fierastrau_maic.jpg)
+
+https://github.com/user-attachments/assets/5cce657d-0867-4d5d-946f-a074369c622f
+
+https://github.com/user-attachments/assets/2eda2189-a0b2-4fff-8216-217d2f586fba
+
+https://github.com/user-attachments/assets/34359a5b-fb60-4da0-a635-136854af1eb6
+
+https://github.com/user-attachments/assets/d5b90157-e1dc-4733-9c42-edf6bdfe2e8f
+
+https://github.com/user-attachments/assets/34aa2c23-dc0a-4dc8-84ad-89c8b3d72968
+
+https://github.com/user-attachments/assets/52bfb119-d22e-4f0b-9487-c9c7a0fa47c5
+
+
 
 </details>
 
