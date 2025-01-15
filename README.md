@@ -59,13 +59,15 @@ All components interact through the master microcontroller, which handles the ap
 </details>
 
 <details>
-   <summary>Circuit Diagram</summary>
+   <summary>Circuit</summary>
 
 ## Circuit Diagram:  
 
 ![MasterCircuit](Images/circuit_img1.png) 
 
 ![MasterCircuit](Images/circuit_img1.png) 
+
+## Circuit Images:
 
 **Signal Diagrams:**  
 - **I2C Communication:** Between the master and slave microcontrollers.  
@@ -1794,7 +1796,7 @@ The `requestEvent` function responds to master requests over I2C.
 ---
 
 <details>
-   <summary>Flow</summary>
+   <summary>Flow and Demo</summary>
 
 
 ## Flow  
@@ -1818,7 +1820,12 @@ The `requestEvent` function responds to master requests over I2C.
    - The LCD displays "Safe Opened!"  
 
 5. **Safe Turned Off:**  
-   - If the switch is turned off, the safe is powered down and the game is reset.  
+   - If the switch is turned off, the safe is powered down and the game is reset.
+  
+## Demo video of the functionality
+
+
+   
 </details>
 
 
@@ -1837,6 +1844,9 @@ The `requestEvent` function responds to master requests over I2C.
 
 ---
 
+<details>
+<summary>Results</summary>
+
 ## Results  
 
 1. A functional safe box system that integrates multiple components such as LEDs, LCD, servo motor, buttons, and an RFID reader.  
@@ -1845,3 +1855,4 @@ The `requestEvent` function responds to master requests over I2C.
    - **SPI:** For communication between the slave and RFID reader.  
 3. Practical application of PWM for servo motor control and interrupts for button handling.  
 4. An educational project that applies knowledge from laboratory exercises and demonstrates a real-world use case.  
+   </details>
