@@ -69,12 +69,12 @@ All components interact through the master microcontroller, which handles the ap
    |----------------------|-----------------------|
    | Green LED            | 13                    |
    | Red LED              | 12                    |
-   | Blue LED             | 11                    |
-   | Yellow LED           | 10                    |
-   | White LED            | 9                     |
-   | Orange LED           | 8                     |
-   | Pink LED             | 7                     |
-   | Purple LED           | 6                     |
+   | Green LED            | 11                    |
+   | Red LED              | 10                    |
+   | Green LED            | 9                     |
+   | Red LED              | 8                     |
+   | Green LED            | 7                     |
+   | Red LED              | 6                     |
    | Button               | 5                     |
    | Rotary Encoder SW    | 4                     |
    | Rotary Encoder CLK   | 3                     |
@@ -110,6 +110,40 @@ All components interact through the master microcontroller, which handles the ap
 - **I2C Communication:** Between the master and slave microcontrollers.  
 - **PWM Signal:** For servo motor control.  
 - **SPI Communication:** Between the slave microcontroller and the RFID reader.  
+
+</details>
+
+<details>
+   <summary>Circuit Design Explanation</summary>
+
+## Master Arduino Uno R3
+
+- It was the required microcontroller for the project.
+
+## Slave Arduino Uno R3
+
+- Introduced to meet the need of more pins.
+
+## OLED Display
+
+- Shows the digits that are guessed,messages and an animation.
+
+## Rotary Encoder with Pushbutton
+
+- Allows the change of digits for the guessing of the code as well as the transition between
+  the guesses and the restart of the game.
+
+## Servomotor
+
+- Locks and unlocks the door of the safe in a simple way.
+
+## RC522
+
+- Unlocks the door when met with the right UID in case of a voluntary "forceful" opening of the safe.
+
+## Switch
+
+- Turn on and off the power for the circuit.
 
 </details>
 
@@ -1955,5 +1989,6 @@ The `requestEvent` function responds to master requests over I2C.
 
 ## Other
 
-Because the microcontrollers, the breadboards and the battery support are not fiex in place once the safe is lifted the connection
+-Because the microcontrollers, the breadboards and the battery support are not fiex in place once the safe is lifted the connection
 of the components is most likely to be distrubed, it is recommended to put the safe on a stable surface to use it for now.
+- If I were to redo the project I would get larger walls for the safe as well as better wire management from the very begining.
