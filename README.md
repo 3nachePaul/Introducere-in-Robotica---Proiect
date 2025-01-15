@@ -34,6 +34,9 @@ All components interact through the master microcontroller, which handles the ap
 </details>
 ---
 
+<details>
+   <summary>Hardware Design</summary>
+   
 # Hardware Design  
 
 <details>
@@ -55,6 +58,9 @@ All components interact through the master microcontroller, which handles the ap
 | Switch | 1 | Turns the device on and off. | | Personal item. |
 </details>
 
+<details>
+   <summary>Circuit Diagram</summary>
+
 ## Circuit Diagram:  
 
 (To be added later to visually represent the connections between components.)  
@@ -64,8 +70,13 @@ All components interact through the master microcontroller, which handles the ap
 - **PWM Signal:** For servo motor control.  
 - **SPI Communication:** Between the slave microcontroller and the RFID reader.  
 
+</details>
 ---
+</details>
 
+<details>
+   <summary>Software Design</summary>
+   
 # Software Design  
 
 ## Description:
@@ -73,7 +84,8 @@ All components interact through the master microcontroller, which handles the ap
 
 ## Master Arduino:
  <details> 
-
+   <summary>Libraries Used</summary>
+      
 ## Libraries Used
 
 ```
@@ -101,6 +113,10 @@ All components interact through the master microcontroller, which handles the ap
  <details></details>   
 
 <details>
+
+<detials>
+   <summary>Constans</summary>
+   
 ## Constants
 
 ```
@@ -158,6 +174,8 @@ const int CORRECT_PLACE_LEDS[] = {12, 10, 8, 6};
 </details>
 
 <details>
+   <summary>Globals</summary>
+   
 ## Globals
 
 ```
@@ -292,6 +310,10 @@ const byte PROGMEM frames[][128] = {
 ### frames
 - A constant array of bytes stored in program memory (PROGMEM) that contains the frames of the animation.
 </details>
+
+<details>
+   <summary>setup Function</summary>
+
 # setup Function
 
 ```
@@ -395,6 +417,10 @@ The `setup` function is called once when the microcontroller starts. It initiali
 
 ### generateNewCode();
 - Calls the `generateNewCode` function to generate a new code for the safe.
+</details>
+
+<details>
+   <summary>loop Function</summary>
 
 # loop Function
 
@@ -464,7 +490,10 @@ The `loop` function runs continuously after the `setup` function has completed. 
 
 ### if (isLocking && millis() - lastActionTime >= 500) { ... }
 - Checks if the safe is in the process of locking and if 500 milliseconds have passed since the last action. If true, it sets the servo motor to the lock angle, updates `isLocking` to false, and records the current time in `lastActionTime`.
+</details>
 
+<details>
+   <summary>updateDisplayCode</summary>
 
 # updateDisplayCode Function
 
@@ -519,7 +548,10 @@ The `updateDisplayCode` function updates the code displayed on the OLED screen b
 
 ### display.display();
 - Displays the content on the OLED screen.
+  </details>
 
+<details>
+   <summary>generateNewCode</summary>
 
 # generateNewCode Function
 
@@ -550,6 +582,10 @@ The `generateNewCode` function generates a new random 4-digit code and prints it
 
 ### Serial.println();
 - Prints a newline character to the serial monitor to end the line after printing the full code.
+</details>
+
+<details>
+<summary>handelCodeInput Function</summary>
 
 # handleCodeInput Function
 
@@ -614,7 +650,10 @@ The `handleCodeInput` function handles the user's input for guessing the code. I
 
 ### updateDisplayCode();
 - Calls the `updateDisplayCode` function to update the code displayed on the OLED screen.
+</details>
 
+<details>
+<summary>displayAccessGrantedMessage Function</summary>
 
 # displayAccessGrantedMessage Function
 
@@ -663,6 +702,10 @@ The `displayAccessGrantedMessage` function displays an "Access Granted!" message
 
 ### display.display();
 - Updates the OLED display to show the cleared screen.
+</details>
+
+<details>
+<summary>evaluateGuess Function</summary>
 
 # evaluateGuess Function
 
@@ -748,6 +791,10 @@ The `evaluateGuess` function evaluates the user's guess against the correct code
 
 ### crackedMessageStartTime = millis();
 - Records the current time in milliseconds to track how long the "Cracked!" message has been displayed.
+</details>
+
+<details>
+<summart>updateLEDs Function</summart>
 
 # updateLEDs Function
 
@@ -774,7 +821,11 @@ The `updateLEDs` function updates the state of the LEDs based on the number of c
 
 ### digitalWrite(CORRECT_PLACE_LEDS[i], i < correctPlace ? HIGH : LOW);
 - Sets the state of the LEDs indicating the correct placement of digits. If `i` is less than `correctPlace`, the LED is turned on (HIGH); otherwise, it is turned off (LOW).
+</details>
 
+<details>
+   <summary>unlockSafe Function</summary>
+   
 # unlockSafe Function
 
 ```
@@ -852,6 +903,10 @@ The `unlockSafe` function unlocks the safe, displays an "Unlocked!" message, and
 
 ### displayButtonPressAnimation();
 - Calls the `displayButtonPressAnimation` function to display the button press animation.
+</details>
+
+<details>
+<summary>displayButtonPressAnimation</summary>
 
 # displayButtonPressAnimation Function
 
@@ -974,7 +1029,11 @@ The `displayButtonPressAnimation` function displays an animation on the OLED scr
 
 ### break;
 - Exits the infinite loop to end the function.
+</details>
 
+<details>
+   <summary>waitForLock Function</summary>
+   
 # waitForLock Function
 
 ```
@@ -1027,7 +1086,11 @@ The `waitForLock` function waits for the user to press a button to lock the safe
 
 ### locked = true;
 - Sets the `locked` variable to `true` to exit the loop.
+</details>
 
+<details>
+   <summary>startupAnimation Function</summary>
+   
 # startupAnimation Function
 
 ```
@@ -1079,7 +1142,11 @@ The `startupAnimation` function displays a startup animation with the messages "
 
 ### while (millis() - startMillis < 500) { ... }
 - Enters a loop that continues until 500 milliseconds have passed. This effectively creates a delay without using the `delay` function.
+</details>
 
+<details>
+   <summary>updateEncoder Function</summary>
+   
 # updateEncoder Function
 
 ```
@@ -1109,7 +1176,11 @@ The `updateEncoder` function updates the encoder value based on the state of the
 
 ### lastAState = currentAState;
 - Updates the `lastAState` variable to the current state of the encoder's A pin.
+</details>
 
+<details>
+   <summary>checkStopSignal</summary>
+   
 # checkStopSignal Function
 
 ```
@@ -1139,7 +1210,11 @@ The `checkStopSignal` function checks for a stop signal from a slave device over
 
 ### return false;
 - Returns `false` if no data is available or the data is not equal to 1.
+</details>
 
+<details>
+   <summary>lockSafe Function</summary>
+   
 # lockSafe Function
 
 ```
@@ -1193,6 +1268,10 @@ The `lockSafe` function locks the safe, displays a "Locked" message, and resets 
 
 ### resetGame();
 - Calls the `resetGame` function to reset the game.
+</details>
+
+<details>
+   <summary>resetGame Function</summary>
 
 # resetGame Function
 
@@ -1221,7 +1300,9 @@ The `resetGame` function resets the game state, generates a new code, and update
 
 ### updateLEDs(0, 0);
 - Calls the `updateLEDs` function to turn off all the LEDs.
+</details>
 
+<details></details>
 # resetGuess Function
 
 ```
@@ -1251,8 +1332,13 @@ The `resetGuess` function resets the user's guess and the encoder value.
 
 ### codeGuess[i] = 0;
 - Resets each digit of the `codeGuess` array to 0.
+</details>
+
+<details>
+   <summary>animateLEDs Function></summary>
 
 # animateLEDs Function
+
 
 ```
 void animateLEDs() {
@@ -1380,14 +1466,21 @@ The `animateLEDs` function performs an LED animation sequence using non-blocking
 
 ### digitalWrite(CORRECT_PLACE_LEDS[i], LOW);
 - Turns off the LED in `CORRECT_PLACE_LEDS` at index `i`.
-
+</details>
 </details> 
+
+<details>
+   <summary>Slave Arduino</summary>
+
 # Slave Arduino:
 
 # RFID Reader and I2C Communication
 
 This code sets up an RFID reader using the MFRC522 library and communicates with a master device over I2C. It reads RFID card UIDs, validates them, and sends a stop signal to the master if a valid UID is detected.
 
+<datails>
+   <summary>Libraries and Definitions</summary>
+   
 ## Libraries and Definitions
 
 ```
@@ -1429,6 +1522,10 @@ volatile bool stopSignal = false;
 
 ### volatile bool stopSignal = false;
 - Declares a volatile boolean variable to store the stop signal state.
+</details>
+
+<details>
+   <summary>setup Function</summary>
 
 ## setup Function
 
@@ -1469,6 +1566,10 @@ The `setup` function initializes the I2C communication, RFID reader, and serial 
 
 ### Serial.println("RFID Reader ready...");
 - Prints a message to the serial monitor indicating that the RFID reader is ready.
+</details>
+
+<details>
+   <summary>loop Function</summary>
 
 ## loop Function
 
@@ -1515,6 +1616,10 @@ The `loop` function continuously checks for RFID cards and processes them.
 
 ### rfid.PICC_HaltA();
 - Stops reading the card.
+</details>
+
+<details>
+   <summary>readRFID Function</summary>
 
 ## readRFID Function
 
@@ -1551,6 +1656,10 @@ The `readRFID` function reads the RFID UID and returns it as a string.
 
 ### return uid;
 - Returns the UID string.
+</details>
+
+<details>
+   <summary>validateRFID Function</summary>
 
 ## validateRFID Function
 
@@ -1595,6 +1704,10 @@ The `validateRFID` function checks if the given UID is valid.
 
 ### return false;
 - Returns false if the UID is not valid.
+</details>
+
+<details>
+   <summary>requestEvent Function</summary>
 
 ## requestEvent Function
 
@@ -1626,7 +1739,8 @@ The `requestEvent` function responds to master requests over I2C.
 
 ### Wire.write(0);
 - Sends no signal (0) to the master if the stop signal is not set.
-
+   </details>
+</details>
 ---
 **Master Microcontroller Responsibilities:**  
 1. Displaying status messages and user input on the LCD.  
@@ -1648,6 +1762,9 @@ The `requestEvent` function responds to master requests over I2C.
 - **Servo Control:** Unlocks the safe when the correct combination is entered or RFID access is granted.  
 
 ---
+<details>
+   <summary>Flow</summary>
+
 
 ## Flow  
 
@@ -1671,8 +1788,12 @@ The `requestEvent` function responds to master requests over I2C.
 
 5. **Safe Turned Off:**  
    - If the switch is turned off, the safe is powered down and the game is reset.  
-
+</details>
+</details>
 ---
+
+<details>
+   <summary>Resources</summary>
 
 ## Resources  
 
@@ -1680,6 +1801,7 @@ The `requestEvent` function responds to master requests over I2C.
 - [Rotary Encoder with pushbutton](https://lastminuteengineers.com/rotary-encoder-arduino-tutorial/)
 - [RFID](https://www.youtube.com/watch?v=pdBrvLGH0PE)
 - [OLED Display](https://randomnerdtutorials.com/guide-for-oled-display-with-arduino/)
+</details>
 ---
 
 ## Results  
