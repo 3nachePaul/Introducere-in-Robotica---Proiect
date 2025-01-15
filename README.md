@@ -24,7 +24,7 @@ I wanted to make a safe and then I found a game made by someone and I wanted to 
 
 **Block Diagram:**  
 
-(To be added at a later stage of the project)
+![BlockDiagram](Images/Schema_bloc_updated.jpg)
 
 
 
@@ -63,13 +63,30 @@ All components interact through the master microcontroller, which handles the ap
 
 ## Circuit Diagram:  
 
-(To be added later to visually represent the connections between components.)  
+![MasterCircuit](Images/circuit_img1.png) 
+
+![MasterCircuit](Images/circuit_img1.png) 
 
 **Signal Diagrams:**  
 - **I2C Communication:** Between the master and slave microcontrollers.  
 - **PWM Signal:** For servo motor control.  
 - **SPI Communication:** Between the slave microcontroller and the RFID reader.  
 
+</details>
+
+<details>
+   <summary>Making of the box and soldering</summary>
+
+## Making The Box
+
+Isketched 13cm length squares on a 2mm tichness mdf board that I cut suing 2 types of saw and I made the holes using a hand drill.
+The squares were attached to each other using corner guard and screws.
+
+## Soldering
+
+I soldered the resistors to the leds, the pin header connector to the RC522 and the wires: to the leds, between them and to a pin header connector.
+I used a [plusivo soldering kit](https://www.optimusdigital.ro/ro/kituri/12919-kit-plusivo-pentru-lipit-eu-v5-cu-multimetru-digital.html?search_query=kit+ipit&results=33). 
+   
 </details>
 
 </details>
