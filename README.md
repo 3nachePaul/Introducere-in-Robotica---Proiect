@@ -21,7 +21,6 @@ I wanted to make a safe and then I found a game made by someone and I wanted to 
 - **For me:** Practical understanding of protocols and hardware components.  
 - **For others:** Inspiration for similar projects, use as an educational device, or as a game.  
 
----
 
 **Block Diagram:**  
 
@@ -32,6 +31,7 @@ I wanted to make a safe and then I found a game made by someone and I wanted to 
 All components interact through the master microcontroller, which handles the application logic and communication with the slave microcontroller for RFID access validation.
 
 </details>
+
 ---
 
 <details>
@@ -71,8 +71,10 @@ All components interact through the master microcontroller, which handles the ap
 - **SPI Communication:** Between the slave microcontroller and the RFID reader.  
 
 </details>
----
+
 </details>
+
+---
 
 <details>
    <summary>Software Design</summary>
@@ -84,6 +86,8 @@ All components interact through the master microcontroller, which handles the ap
 
 ## Master Arduino:
  <details> 
+    <summary>Master Arduino</summary>
+    <details>
    <summary>Libraries Used</summary>
       
 ## Libraries Used
@@ -110,7 +114,7 @@ All components interact through the master microcontroller, which handles the ap
 
 ### Servo.h
 - The `Servo` library is used to control servo motors. It provides functions to attach a servo motor to a specific pin, set the angle of the servo, and control its movement. In this project, the library is used to control the servo motor that locks and unlocks the safe. 
- <details></details>   
+</details>   
 
 <details>
 
@@ -794,7 +798,7 @@ The `evaluateGuess` function evaluates the user's guess against the correct code
 </details>
 
 <details>
-<summart>updateLEDs Function</summart>
+<summary>updateLEDs Function</summary>
 
 # updateLEDs Function
 
@@ -1302,7 +1306,9 @@ The `resetGame` function resets the game state, generates a new code, and update
 - Calls the `updateLEDs` function to turn off all the LEDs.
 </details>
 
-<details></details>
+<details>
+   <summary>resetGuess Function</summary>
+   
 # resetGuess Function
 
 ```
@@ -1332,10 +1338,10 @@ The `resetGuess` function resets the user's guess and the encoder value.
 
 ### codeGuess[i] = 0;
 - Resets each digit of the `codeGuess` array to 0.
-</details>
+</details>  
 
 <details>
-   <summary>animateLEDs Function></summary>
+   <summary>animateLEDs Function</summary>
 
 # animateLEDs Function
 
@@ -1469,18 +1475,21 @@ The `animateLEDs` function performs an LED animation sequence using non-blocking
 </details>
 </details> 
 
+
+## Slave Arduino:
 <details>
    <summary>Slave Arduino</summary>
 
-# Slave Arduino:
+
 
 # RFID Reader and I2C Communication
 
 This code sets up an RFID reader using the MFRC522 library and communicates with a master device over I2C. It reads RFID card UIDs, validates them, and sends a stop signal to the master if a valid UID is detected.
 
-<datails>
+
+<details>
    <summary>Libraries and Definitions</summary>
-   
+
 ## Libraries and Definitions
 
 ```
@@ -1740,8 +1749,10 @@ The `requestEvent` function responds to master requests over I2C.
 ### Wire.write(0);
 - Sends no signal (0) to the master if the stop signal is not set.
    </details>
-</details>
+
+
 ---
+
 **Master Microcontroller Responsibilities:**  
 1. Displaying status messages and user input on the LCD.  
 2. Managing buttons for user input.  
@@ -1760,8 +1771,11 @@ The `requestEvent` function responds to master requests over I2C.
   - SPI for RFID reader communication with the slave.  
 - **RFID Validation Logic:** To authenticate users with predefined card UIDs.  
 - **Servo Control:** Unlocks the safe when the correct combination is entered or RFID access is granted.  
+</details>
+</details>
 
 ---
+
 <details>
    <summary>Flow</summary>
 
@@ -1789,7 +1803,8 @@ The `requestEvent` function responds to master requests over I2C.
 5. **Safe Turned Off:**  
    - If the switch is turned off, the safe is powered down and the game is reset.  
 </details>
-</details>
+
+
 ---
 
 <details>
@@ -1802,6 +1817,7 @@ The `requestEvent` function responds to master requests over I2C.
 - [RFID](https://www.youtube.com/watch?v=pdBrvLGH0PE)
 - [OLED Display](https://randomnerdtutorials.com/guide-for-oled-display-with-arduino/)
 </details>
+
 ---
 
 ## Results  
