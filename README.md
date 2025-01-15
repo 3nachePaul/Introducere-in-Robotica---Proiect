@@ -1824,6 +1824,13 @@ The `requestEvent` function responds to master requests over I2C.
   
 ## Demo video of the functionality
 
+[![Thumbnail for Shorts o41zwCnez3Y](https://img.youtube.com/vi/o41zwCnez3Y/0.jpg)](https://youtube.com/shorts/o41zwCnez3Y?feature=share)
+
+[![Thumbnail for Shorts 2kCUnKZMGy0](https://img.youtube.com/vi/2kCUnKZMGy0/0.jpg)](https://youtube.com/shorts/2kCUnKZMGy0?feature=share)
+
+[![Thumbnail for Shorts skhJeEpMiGY](https://img.youtube.com/vi/skhJeEpMiGY/0.jpg)](https://youtube.com/shorts/skhJeEpMiGY?feature=share)
+
+[![Thumbnail for Shorts I1vGTi615sc](https://img.youtube.com/vi/I1vGTi615sc/0.jpg)](https://youtube.com/shorts/I1vGTi615sc?feature=share)
 
    
 </details>
