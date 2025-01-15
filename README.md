@@ -45,17 +45,17 @@ All components interact through the master microcontroller, which handles the ap
 ## Bill of Materials: 
 | **Components**| **Quantity** | **Description** | **Datasheet** | **Source/Link** |
 |---------------|--------------|-----------------|---------------|-----------------|
-| Arduino Uno Microcontroller | 2 | The master coordinates the operation of components by managing I2C communication, PWM, and interrupts. The slave handles the RFID reader and communicates the access status to the master via I2C. | | Personal kit and faculty kit. |
-| OLED Display SSD1306 | 1 | Displays the guessed combination and status messages. | | [SSD1306](https://www.emag.ro/afisaj-oled-ssd1306-oled-i2c-compatibil-arduino-si-raspberry-pi-27x27x4-mm-albastru-c9/pd/D3C7C1YBM/?ref=history-shopping_405308918_158626_1) | 
-| Rotary Encoder with Pushbutton | 1 | It's used to change the digits that are guessed and to submit the answers. It also restarts the game. | | [Rotary Encoder w Pushbutton](https://www.emag.ro/modul-encoder-rotativ-cu-buton-rosfix-360-grade-20-impulsuri-rotire-26x19mm-pzxo-cq39/pd/DYC8PSYBM/?ref=history-shopping_405308918_186146_1) |
-| LEDs | 8 | For feedback on guesses as well as a little display of lights. | | Personal kit. |  
-| RFID Reader Module RC522 | 1 | It's used as the only option to open the safe withouth guessing the code. | | [RC522](https://www.optimusdigital.ro/en/wireless-rfid/67-mfrc522-rfid-module.html?search_query=rfid&results=30)  
-| Servo Motor SG90 | 1| Locks and unlocks the safe. | | Personal kit. |
-| 330Ω Resistors| 8 | Makes sure the LEDs are working properly. | | Personal kit. |  
-| Jumper Wires | N/A | Connects pins to some component by using a soldering kit. | | [Wires](https://www.optimusdigital.ro/ro/fire-fire-mufate/8731-cablu-12p-125-mm-mufat-la-un-singur-capat-20-cm.html?srsltid=AfmBOoqENSjVWkFWeGit2W4nyUuQcLfRHr1fEtEcQdCk4jS_TgpcTiDA)
-| Breadboard | 2 | Used to connect components to a power source and ground. | | Faculty kit.|  
-| Power supply 4xAA Battery Support | 1 | Powers source for the components. | | [Battery Support](https://www.optimusdigital.ro/ro/suporturi-de-baterii/12375-suport-baterii-4-x-aa.html?srsltid=AfmBOoofXrcJw2xVfQ2PUKit96xbxR78K6Rq58X9t2aqwo0t1SOdFPyv) 
-| Switch | 1 | Turns the device on and off. | | Personal item. |
+| Arduino Uno Microcontroller | 2 | The master coordinates the operation of components by managing I2C communication, PWM, and interrupts. The slave handles the RFID reader and communicates the access status to the master via I2C. | [Link to datasheet and more](https://docs.arduino.cc/hardware/uno-rev3/) | Personal kit and faculty kit. |
+| OLED Display SSD1306 | 1 | Displays the guessed combination and status messages. |[SSD1306 datasheet](https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf) | [SSD1306](https://www.emag.ro/afisaj-oled-ssd1306-oled-i2c-compatibil-arduino-si-raspberry-pi-27x27x4-mm-albastru-c9/pd/D3C7C1YBM/?ref=history-shopping_405308918_158626_1) | 
+| Rotary Encoder with Pushbutton KY-040 | 1 | It's used to change the digits that are guessed and to submit the answers. It also restarts the game. | [KY-040 datasheet](https://www.rcscomponents.kiev.ua/datasheets/ky-040-datasheet.pdf?srsltid=AfmBOoowfQPDwyjgYCvvT0xByS4xcktQgP5ZGPhLJJ2l2TtwWTf65FRt) | [Rotary Encoder w Pushbutton](https://www.emag.ro/modul-encoder-rotativ-cu-buton-rosfix-360-grade-20-impulsuri-rotire-26x19mm-pzxo-cq39/pd/DYC8PSYBM/?ref=history-shopping_405308918_186146_1) |
+| LEDs | 8 | For feedback on guesses as well as a little display of lights. | N/A | Personal kit. |  
+| RFID Reader Module RC522 | 1 | It's used as the only option to open the safe withouth guessing the code. | [RC522 NXP datasheet](https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf) | [RC522](https://www.optimusdigital.ro/en/wireless-rfid/67-mfrc522-rfid-module.html?search_query=rfid&results=30)  
+| Servo Motor SG90 | 1| Locks and unlocks the safe. | [SG90](https://www.friendlywire.com/projects/ne555-servo-safe/SG90-datasheet.pdf) | Personal kit. |
+| 330Ω Resistors| 8 | Makes sure the LEDs are working properly. | N/A | Personal kit. |  
+| Jumper Wires | N/A | Connects pins to some component by using a soldering kit. | N/A | [Wires](https://www.optimusdigital.ro/ro/fire-fire-mufate/8731-cablu-12p-125-mm-mufat-la-un-singur-capat-20-cm.html?srsltid=AfmBOoqENSjVWkFWeGit2W4nyUuQcLfRHr1fEtEcQdCk4jS_TgpcTiDA)
+| Breadboard | 2 | Used to connect components to a power source and ground. | N/A | Faculty kit.|  
+| Power supply 4xAA Battery Support | 1 | Powers source for the components. | N/A | [Battery Support](https://www.optimusdigital.ro/ro/suporturi-de-baterii/12375-suport-baterii-4-x-aa.html?srsltid=AfmBOoofXrcJw2xVfQ2PUKit96xbxR78K6Rq58X9t2aqwo0t1SOdFPyv) 
+| Switch | 1 | Turns the device on and off. | N/A | Personal item. |
 </details>
 
 <details>
