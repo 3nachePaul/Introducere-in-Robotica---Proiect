@@ -102,7 +102,7 @@ All components interact through the master microcontroller, which handles the ap
 
 ![MasterCircuit](Images/circuit_img1.png) 
 
-![MasterCircuit](Images/circuit_img1.png) 
+![MasterCircuit](Images/circuit_img2.png) 
 
 ## Circuit Images:
 
@@ -1920,24 +1920,28 @@ The `requestEvent` function responds to master requests over I2C.
 ## Flow  
 
 1. **Turning the Safe On:**  
-   - The switch is turned on, and a message is displayed on the LCD ("CRACK THE CODE!").  
+   - The switch is turned on, and a message is displayed on the OLED ("CRACK THE CODE!").  
    - The game begins, and the player can start guessing the combination.  
 
 2. **Guessing the Combination:**  
-   - The player enters a combination using the buttons.  
+   - The player enters a combination using the encoder.  
    - LEDs indicate the number of correct digits and their positions.  
    - The process continues until the correct combination is entered.  
 
 3. **RFID Access:**  
    - The slave microcontroller reads RFID cards using the MFRC522 module.  
    - Valid cards unlock the safe by sending a stop signal to the master via I2C.  
-   - The LCD displays "Access Granted!" when a valid card is scanned.  
+   - The OLED displays "Access Granted!" when a valid card is scanned.  
 
 4. **Unlocking the Safe:**  
    - If the correct combination is entered or a valid RFID card is scanned, the servo motor unlocks the safe.  
-   - The LCD displays "Safe Opened!"  
+   - The OLED displays "Unlocked!"  
 
-5. **Safe Turned Off:**  
+5 **Restarting the Game**
+   - Afther the "Unlocked!" message the OLED displays "Press the button" and an animation.
+   - When the button is pressed the motor will lock the safe again and the game logic will restart.
+
+6. **Safe Turned Off:**  
    - If the switch is turned off, the safe is powered down and the game is reset.
   
 ## Demo video of the functionality
