@@ -1,4 +1,3 @@
-#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -15,7 +14,7 @@ const int PIN_B = 4;
 const int BUTTON_PIN = 5;
 const int SERVO_UNLOCK_ANGLE =  map(50, -60, 60, 0, 180);;
 const int SERVO_LOCK_ANGLE =  map(-50, -60, 60, 0, 180);
-const unsigned long DEBOUNCE_TIME = 50; // Debounce time in milliseconds
+const unsigned long DEBOUNCE_TIME = 50;
 
 const int CORRECT_NUM_LEDS[] = {13, 11, 9, 6};
 const int CORRECT_PLACE_LEDS[] = {12, 10, 8, 7};
@@ -30,7 +29,7 @@ byte guessingDigit = 0;
 byte numGuesses = 0;
 volatile int encoderValue = 0;
 volatile int lastAState;
-
+volatile int updateEncoderCounter = 0;
 
 bool isUnlocking = false;
 bool isLocking = false;
@@ -79,9 +78,6 @@ const byte PROGMEM frames[][128] = {
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,19,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,0,0,0,17,192,0,0,17,254,0,0,17,51,192,0,17,51,32,0,17,19,32,15,16,3,48,25,144,0,48,24,208,0,48,8,112,0,48,12,48,0,48,6,16,0,48,3,0,0,48,1,128,0,48,0,192,0,32,0,96,0,32,0,48,0,96,0,12,0,64,0,7,255,128,0,0,254,0,0,0,0,0}
 };
 
-
-
-
 void setup() {
     Serial.begin(9600);
 
@@ -126,25 +122,18 @@ void loop() {
         return;
     }
 
+    if (checkStopSignal()) {
+        displayAccessGrantedMessage();
+        unlockSafe();
+        return;
+    }
+
     handleCodeInput();
     numGuesses++;
     evaluateGuess();
 
     resetGuess();
     updateDisplayCode();
-
-    // Handle non-blocking delays
-    if (isUnlocking && millis() - lastActionTime >= 500) {
-        lockServo.write(SERVO_UNLOCK_ANGLE);
-        isUnlocking = false;
-        lastActionTime = millis();
-    }
-
-    if (isLocking && millis() - lastActionTime >= 500) {
-        lockServo.write(SERVO_LOCK_ANGLE);
-        isLocking = false;
-        lastActionTime = millis();
-    }
 }
 
 void updateDisplayCode() {
@@ -175,6 +164,7 @@ void generateNewCode() {
 }
 
 void handleCodeInput() {
+    Serial.println("Entering handleCodeInput");
     for (int i = 0; i < 4; i++) {
         guessingDigit = i;
         bool confirmed = false;
@@ -208,9 +198,7 @@ void displayAccessGrantedMessage() {
     display.println(F("Access Granted!"));
     display.display();
     unsigned long startMillis = millis();
-    while (millis() - startMillis < 5000) {
-        // Wait for 5000 milliseconds (5 seconds)
-    }
+    while (millis() - startMillis < 5000) {}
     display.clearDisplay();
     display.display();
 }
@@ -264,9 +252,7 @@ void unlockSafe() {
     display.display();
 
     unsigned long startMillis = millis();
-    while (millis() - startMillis < 3000) {
-        // Wait for 3000 milliseconds (3 seconds)
-    }
+    while (millis() - startMillis < 3000) {}
 
     display.clearDisplay();
     display.display();
@@ -277,8 +263,8 @@ void unlockSafe() {
 
 void displayButtonPressAnimation() {
     const char* staticText = "Press the button";
-    int16_t textX = (SCREEN_WIDTH - strlen(staticText) * 6) / 2; // Center the text horizontally
-    int16_t textY = 0;  // Fixed vertical position for static text
+    int16_t textX = (SCREEN_WIDTH - strlen(staticText) * 6) / 2;
+    int16_t textY = 0;
 
     int frame = 0;
     unsigned long lastFrameTime = millis();
@@ -315,25 +301,6 @@ void displayButtonPressAnimation() {
     }
 }
 
-
-
-
-void waitForLock() {
-    bool locked = false;
-    while (!locked) {
-        bool buttonState = digitalRead(BUTTON_PIN);
-        if (buttonState != oldButtonState && millis() - buttonPressTime >= DEBOUNCE_TIME) {
-            buttonPressTime = millis();
-            oldButtonState = buttonState;
-
-            if (buttonState == LOW) {
-                lockSafe();
-                locked = true;
-            }
-        }
-    }
-}
-
 void startupAnimation() {
     const char* messages[] = {"Crack", "The", "Code"};
     for (int i = 0; i < 3; i++) {
@@ -344,16 +311,18 @@ void startupAnimation() {
         display.display();
 
         unsigned long startMillis = millis();
-        while (millis() - startMillis < 500) {
-            // Wait for 500 milliseconds
-        }
+        while (millis() - startMillis < 500) {}
     }
 }
 
 void updateEncoder() {
     int currentAState = digitalRead(PIN_A);
     if (currentAState != lastAState) {
-        encoderValue += (digitalRead(PIN_B) != currentAState) ? 1 : -1;
+        updateEncoderCounter++;
+        if(updateEncoderCounter == 2) {
+          encoderValue += (digitalRead(PIN_B) != currentAState) ? 1 : -1;
+          updateEncoderCounter = 0;
+          }
         lastAState = currentAState;
     }
 }
@@ -381,7 +350,10 @@ void lockSafe() {
 }
 
 void resetGame() {
+    Serial.println("The game was reset.");
     correctGuess = false;
+    Serial.println(correctGuess ? "true" : "false");
+    Serial.println(correctGuess);
     resetGuess();
     generateNewCode();
     updateLEDs(0, 0);
@@ -399,52 +371,40 @@ void animateLEDs() {
   unsigned long startTime = millis();
   unsigned long elapsedTime = 0;
 
-  // Total duration for the animation in milliseconds
-  unsigned long animationDuration = 2000; // 2 seconds
-  unsigned long interval = 200;  // Delay between each LED action (ms)
+  unsigned long animationDuration = 2000;
+  unsigned long interval = 200;
 
-  int numLeds = 4; // Number of LEDs in each array
+  int numLeds = 4;
 
   while (elapsedTime < animationDuration) {
     elapsedTime = millis() - startTime;
 
-    // Step 1: Light up CORRECT_NUM_LEDS[] one by one, ensuring the last one is the 4th LED
     if (elapsedTime < (interval * numLeds)) {
-      int ledIndex = elapsedTime / interval;  // Determine which LED to turn on
-      if (ledIndex < numLeds - 1) {
-        digitalWrite(CORRECT_NUM_LEDS[ledIndex], HIGH);  // Turn on LED in CORRECT_NUM_LEDS[]
-      }
-      if (ledIndex == numLeds - 1) {
-        // Light up the last LED (CORRECT_NUM_LEDS[3]) last
+      int ledIndex = elapsedTime / interval;
+      if (ledIndex < numLeds - 1)
         digitalWrite(CORRECT_NUM_LEDS[ledIndex], HIGH);
-      }
+      if (ledIndex == numLeds - 1)
+        digitalWrite(CORRECT_NUM_LEDS[ledIndex], HIGH);
     }
 
-    // Step 2: Light up CORRECT_PLACE_LEDS[] after all CORRECT_NUM_LEDS[] are lit
     else if (elapsedTime < (interval * (numLeds + numLeds))) {
-      int ledIndex = (elapsedTime - (interval * numLeds)) / interval;  // Determine which LED to turn on from CORRECT_PLACE_LEDS
-      if (ledIndex < numLeds) {
-        digitalWrite(CORRECT_PLACE_LEDS[ledIndex], HIGH);  // Turn on LED in CORRECT_PLACE_LEDS[]
-      }
+      int ledIndex = (elapsedTime - (interval * numLeds)) / interval;
+      if (ledIndex < numLeds)
+        digitalWrite(CORRECT_PLACE_LEDS[ledIndex], HIGH);
     }
 
-    // Step 3: Turn off LEDs in reverse order after the animation duration
     else if (elapsedTime < animationDuration + (interval * numLeds)) {
-      int ledIndex = (elapsedTime - animationDuration) / interval;  // Reverse turn-off
+      int ledIndex = (elapsedTime - animationDuration) / interval;
       if (ledIndex < numLeds) {
-        digitalWrite(CORRECT_PLACE_LEDS[numLeds - 1 - ledIndex], LOW);  // Turn off LED in reverse order from CORRECT_PLACE_LEDS[]
+        digitalWrite(CORRECT_PLACE_LEDS[numLeds - 1 - ledIndex], LOW);
       }
     } else {
-      int ledIndex = (elapsedTime - animationDuration - (interval * numLeds)) / interval;  // Reverse turn-off
-      if (ledIndex < numLeds) {
-        digitalWrite(CORRECT_NUM_LEDS[numLeds - 1 - ledIndex], LOW);  // Turn off LED in reverse order from CORRECT_NUM_LEDS[]
-      }
+      int ledIndex = (elapsedTime - animationDuration - (interval * numLeds)) / interval;
+      if (ledIndex < numLeds)
+        digitalWrite(CORRECT_NUM_LEDS[numLeds - 1 - ledIndex], LOW);
     }
-
-    // Non-blocking: Avoid using delay() to keep everything smooth
   }
 
-  // After the full 2 seconds, make sure all LEDs are off
   for (int i = 0; i < numLeds; i++) {
     digitalWrite(CORRECT_NUM_LEDS[i], LOW);
     digitalWrite(CORRECT_PLACE_LEDS[i], LOW);
