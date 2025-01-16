@@ -26,12 +26,12 @@ void setup() {
 void loop() {
   // Check for RFID card
   if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
-    String uid = readRFID(); // Read the card UID
+    String uid = readRFID();
     Serial.print("Card UID: ");
     Serial.println(uid);
 
-    if (validateRFID(uid)) { // Check if the UID is valid
-      stopSignal = true; // Set the STOP signal for the master
+    if (validateRFID(uid)) {
+      stopSignal = true;
     }
 
     rfid.PICC_HaltA(); // Stop reading the card
@@ -44,7 +44,7 @@ String readRFID() {
   for (byte i = 0; i < rfid.uid.size; i++) {
     uid += String(rfid.uid.uidByte[i], HEX);
     if (i < rfid.uid.size - 1) {
-      uid += " "; // Add space between bytes
+      uid += " ";
     }
   }
   return uid;
@@ -52,7 +52,6 @@ String readRFID() {
 
 // Function to validate the RFID UID
 bool validateRFID(String uid) {
-  // Valid RFID UIDs
   const String validUIDs[] = {"B8 D5 21 12", "30 9D 7F 14"};
   for (String validUID : validUIDs) {
     if (uid.equalsIgnoreCase(validUID)) {
@@ -68,7 +67,7 @@ bool validateRFID(String uid) {
 void requestEvent() {
   if (stopSignal) {
     Wire.write(1); // Send STOP signal
-    stopSignal = false; // Reset the signal
+    stopSignal = false;
   } else {
     Wire.write(0); // Send no signal
   }
