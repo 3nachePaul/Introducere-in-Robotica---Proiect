@@ -1208,7 +1208,11 @@ The `startupAnimation` function displays a startup animation with the messages "
 void updateEncoder() {
     int currentAState = digitalRead(PIN_A);
     if (currentAState != lastAState) {
-        encoderValue += (digitalRead(PIN_B) != currentAState) ? 1 : -1;
+        updateEncoderCounter++;
+        if(updateEncoderCounter == 2) {
+          encoderValue += (digitalRead(PIN_B) != currentAState) ? 1 : -1;
+          updateEncoderCounter = 0;
+          }
         lastAState = currentAState;
     }
 }
@@ -1228,6 +1232,9 @@ The `updateEncoder` function updates the encoder value based on the state of the
 
 ### encoderValue += (digitalRead(PIN_B) != currentAState) ? 1 : -1;
 - Updates the encoder value based on the state of the encoder's B pin. If the state of the B pin is different from the current state of the A pin, the encoder value is incremented; otherwise, it is decremented.
+
+### if(updateEncoderCounter == 2) {
+- Checks if it's the second time it entered the loop, the value can be changed to make the user rotate more to change a digit's value.
 
 ### lastAState = currentAState;
 - Updates the `lastAState` variable to the current state of the encoder's A pin.
