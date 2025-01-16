@@ -230,15 +230,11 @@ https://github.com/user-attachments/assets/52bfb119-d22e-4f0b-9487-c9c7a0fa47c5
 ## Libraries Used
 
 ```
-#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Servo.h>
 ```
-
-### SPI.h
-- The `SPI` library is used for communication with devices that use the Serial Peripheral Interface (SPI) protocol. This protocol is commonly used for communication with sensors, SD cards, and other peripherals that require high-speed data transfer.
 
 ### Wire.h
 - The `Wire` library is used for I2C communication. I2C (Inter-Integrated Circuit) is a protocol for communication between microcontrollers and peripheral devices. It is used to communicate with the OLED display in this project.
@@ -329,7 +325,7 @@ byte guessingDigit = 0;
 byte numGuesses = 0;
 volatile int encoderValue = 0;
 volatile int lastAState;
-
+volatile int updateEncoderCounter = 0;
 
 bool isUnlocking = false;
 bool isLocking = false;
@@ -584,18 +580,6 @@ void loop() {
 
     resetGuess();
     updateDisplayCode();
-
-    // Handle non-blocking delays
-    if (isUnlocking && millis() - lastActionTime >= 500) {
-        lockServo.write(SERVO_UNLOCK_ANGLE);
-        isUnlocking = false;
-        lastActionTime = millis();
-    }
-
-    if (isLocking && millis() - lastActionTime >= 500) {
-        lockServo.write(SERVO_LOCK_ANGLE);
-        isLocking = false;
-        lastActionTime = millis();
     }
 }
 ```
@@ -623,14 +607,6 @@ The `loop` function runs continuously after the `setup` function has completed. 
 ### updateDisplayCode();
 - Calls the `updateDisplayCode` function to update the code displayed on the OLED screen.
 
-### // Handle non-blocking delays
-- Handles non-blocking delays for the servo motor to ensure smooth operation without using the `delay` function.
-
-### if (isUnlocking && millis() - lastActionTime >= 500) { ... }
-- Checks if the safe is in the process of unlocking and if 500 milliseconds have passed since the last action. If true, it sets the servo motor to the unlock angle, updates `isUnlocking` to false, and records the current time in `lastActionTime`.
-
-### if (isLocking && millis() - lastActionTime >= 500) { ... }
-- Checks if the safe is in the process of locking and if 500 milliseconds have passed since the last action. If true, it sets the servo motor to the lock angle, updates `isLocking` to false, and records the current time in `lastActionTime`.
 </details>
 
 <details>
@@ -806,9 +782,7 @@ void displayAccessGrantedMessage() {
     display.println(F("Access Granted!"));
     display.display();
     unsigned long startMillis = millis();
-    while (millis() - startMillis < 5000) {
-        // Wait for 5000 milliseconds (5 seconds)
-    }
+    while (millis() - startMillis < 5000) {}
     display.clearDisplay();
     display.display();
 }
@@ -982,9 +956,7 @@ void unlockSafe() {
     display.display();
 
     unsigned long startMillis = millis();
-    while (millis() - startMillis < 3000) {
-        // Wait for 3000 milliseconds (3 seconds)
-    }
+    while (millis() - startMillis < 3000) {}
 
     display.clearDisplay();
     display.display();
@@ -1054,8 +1026,8 @@ The `unlockSafe` function unlocks the safe, displays an "Unlocked!" message, and
 ```
 void displayButtonPressAnimation() {
     const char* staticText = "Press the button";
-    int16_t textX = (SCREEN_WIDTH - strlen(staticText) * 6) / 2; // Center the text horizontally
-    int16_t textY = 0;  // Fixed vertical position for static text
+    int16_t textX = (SCREEN_WIDTH - strlen(staticText) * 6) / 2;
+    int16_t textY = 0;
 
     int frame = 0;
     unsigned long lastFrameTime = millis();
@@ -1173,63 +1145,6 @@ The `displayButtonPressAnimation` function displays an animation on the OLED scr
 </details>
 
 <details>
-   <summary>waitForLock Function</summary>
-   
-# waitForLock Function
-
-```
-void waitForLock() {
-    bool locked = false;
-    while (!locked) {
-        bool buttonState = digitalRead(BUTTON_PIN);
-        if (buttonState != oldButtonState && millis() - buttonPressTime >= DEBOUNCE_TIME) {
-            buttonPressTime = millis();
-            oldButtonState = buttonState;
-
-            if (buttonState == LOW) {
-                lockSafe();
-                locked = true;
-            }
-        }
-    }
-}
-```
-
-
-The `waitForLock` function waits for the user to press a button to lock the safe.
-
-### void waitForLock() { ... }
-- Defines the function to wait for the lock action.
-
-### bool locked = false;
-- Initializes a boolean variable `locked` to `false`.
-
-### while (!locked) { ... }
-- Enters a loop that continues until the safe is locked.
-
-### bool buttonState = digitalRead(BUTTON_PIN);
-- Reads the current state of the button and stores it in the `buttonState` variable.
-
-### if (buttonState != oldButtonState && millis() - buttonPressTime >= DEBOUNCE_TIME) { ... }
-- Checks if the button state has changed and if the debounce time has passed since the last button press. This helps to avoid false triggers due to button bounce.
-
-### buttonPressTime = millis();
-- Updates the `buttonPressTime` variable to the current time.
-
-### oldButtonState = buttonState;
-- Updates the `oldButtonState` variable to the current button state.
-
-### if (buttonState == LOW) { ... }
-- Checks if the button is pressed (assuming LOW indicates a pressed state).
-
-### lockSafe();
-- Calls the `lockSafe` function to lock the safe.
-
-### locked = true;
-- Sets the `locked` variable to `true` to exit the loop.
-</details>
-
-<details>
    <summary>startupAnimation Function</summary>
    
 # startupAnimation Function
@@ -1245,8 +1160,7 @@ void startupAnimation() {
         display.display();
 
         unsigned long startMillis = millis();
-        while (millis() - startMillis < 500) {
-        }
+        while (millis() - startMillis < 500) {}
     }
 }
 ```
@@ -1496,38 +1410,34 @@ void animateLEDs() {
   while (elapsedTime < animationDuration) {
     elapsedTime = millis() - startTime;
 
-    // Step 1: Light up CORRECT_NUM_LEDS[] one by one
     if (elapsedTime < (interval * numLeds)) {
-      int ledIndex = elapsedTime / interval;  // Determine which LED to turn on
+      int ledIndex = elapsedTime / interval;
       if (ledIndex < numLeds) {
-        digitalWrite(CORRECT_NUM_LEDS[ledIndex], HIGH);  // Turn on LED in CORRECT_NUM_LEDS[]
+        digitalWrite(CORRECT_NUM_LEDS[ledIndex], HIGH);
       }
     }
 
-    // Step 2: Light up CORRECT_PLACE_LEDS[] after all CORRECT_NUM_LEDS[] are lit
     else if (elapsedTime < (interval * (numLeds + numLeds))) {
-      int ledIndex = (elapsedTime - (interval * numLeds)) / interval;  // Determine which LED to turn on from CORRECT_PLACE_LEDS
+      int ledIndex = (elapsedTime - (interval * numLeds)) / interval;
       if (ledIndex < numLeds) {
-        digitalWrite(CORRECT_PLACE_LEDS[ledIndex], HIGH);  // Turn on LED in CORRECT_PLACE_LEDS[]
+        digitalWrite(CORRECT_PLACE_LEDS[ledIndex], HIGH);
       }
     }
 
-    // Step 3: Turn off LEDs in reverse order after the animation duration
     else if (elapsedTime < animationDuration + (interval * numLeds)) {
-      int ledIndex = (elapsedTime - animationDuration) / interval;  // Reverse turn-off
+      int ledIndex = (elapsedTime - animationDuration) / interval;
       if (ledIndex < numLeds) {
-        digitalWrite(CORRECT_PLACE_LEDS[numLeds - 1 - ledIndex], LOW);  // Turn off LED in reverse order from CORRECT_PLACE_LEDS[]
+        digitalWrite(CORRECT_PLACE_LEDS[numLeds - 1 - ledIndex], LOW);
       }
     } else {
-      int ledIndex = (elapsedTime - animationDuration - (interval * numLeds)) / interval;  // Reverse turn-off
+      int ledIndex = (elapsedTime - animationDuration - (interval * numLeds)) / interval;
       if (ledIndex < numLeds) {
-        digitalWrite(CORRECT_NUM_LEDS[numLeds - 1 - ledIndex], LOW);  // Turn off LED in reverse order from CORRECT_NUM_LEDS[]
+        digitalWrite(CORRECT_NUM_LEDS[numLeds - 1 - ledIndex], LOW);
       }
     }
 
   }
 
-  // After the full 2 seconds, make sure all LEDs are off
   for (int i = 0; i < numLeds; i++) {
     digitalWrite(CORRECT_NUM_LEDS[i], LOW);
     digitalWrite(CORRECT_PLACE_LEDS[i], LOW);
@@ -1723,12 +1633,12 @@ The `setup` function initializes the I2C communication, RFID reader, and serial 
 void loop() {
   // Check for RFID card
   if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
-    String uid = readRFID(); // Read the card UID
+    String uid = readRFID();]
     Serial.print("Card UID: ");
     Serial.println(uid);
 
-    if (validateRFID(uid)) { // Check if the UID is valid
-      stopSignal = true; // Set the STOP signal for the master
+    if (validateRFID(uid)) {
+      stopSignal = true;
     }
 
     rfid.PICC_HaltA(); // Stop reading the card
@@ -1775,7 +1685,7 @@ String readRFID() {
   for (byte i = 0; i < rfid.uid.size; i++) {
     uid += String(rfid.uid.uidByte[i], HEX);
     if (i < rfid.uid.size - 1) {
-      uid += " "; // Add space between bytes
+      uid += " ";
     }
   }
   return uid;
@@ -1811,7 +1721,6 @@ The `readRFID` function reads the RFID UID and returns it as a string.
 
 ```
 bool validateRFID(String uid) {
-  // Valid RFID UIDs
   const String validUIDs[] = {"B8 D5 21 12", "30 9D 7F 14"};
   for (String validUID : validUIDs) {
     if (uid.equalsIgnoreCase(validUID)) {
@@ -1861,7 +1770,7 @@ The `validateRFID` function checks if the given UID is valid.
 void requestEvent() {
   if (stopSignal) {
     Wire.write(1); // Send STOP signal
-    stopSignal = false; // Reset the signal
+    stopSignal = false;
   } else {
     Wire.write(0); // Send no signal
   }
