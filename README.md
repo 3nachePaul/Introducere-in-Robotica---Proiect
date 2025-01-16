@@ -493,6 +493,9 @@ void setup() {
 }
 ```
 
+## Overview
+Initializes the components and prepares the system for operation. Sets up communication with the serial monitor and OLED display. Configures the servo motor, LEDs, rotary encoder, and button. Prepares interrupts for encoder handling and seeds the random number generator. Runs initial animations, locks the safe, and generates a new code.
+
 The `setup` function is called once when the microcontroller starts. It initializes various components and sets up the initial state of the system.
 
 ### Serial.begin(9600);
@@ -585,6 +588,9 @@ void loop() {
 ```
 
 The `loop` function runs continuously after the `setup` function has completed. It handles the main logic of the program, including checking for correct guesses, handling code input, and controlling the servo motor.
+
+## Overview
+It checks to see if the slave arduino gave the signal that the correct UID was scanned and displays the animation for that and unlocks the safe. It lets the user introduce a code, verifies it and resets the array for the guess if it is wrong. If the code is correct then it will display the animation for thatn and unlock the safe.
 
 ### if (correctGuess) { ... }
 - Checks if the user has guessed the correct code. If `correctGuess` is true, it calls the `unlockSafe` function to unlock the safe and returns to exit the loop.
@@ -1890,6 +1896,7 @@ The `requestEvent` function responds to master requests over I2C.
 - [Rotary Encoder with pushbutton](https://lastminuteengineers.com/rotary-encoder-arduino-tutorial/)
 - [RFID](https://www.youtube.com/watch?v=pdBrvLGH0PE)
 - [OLED Display](https://randomnerdtutorials.com/guide-for-oled-display-with-arduino/)
+- [Animation](https://animator.wokwi.com/)
 </details>
 
 ---
